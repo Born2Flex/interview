@@ -6,10 +6,6 @@ In addition, the application offers features for HR to search for specialists wi
 
 - [Functionality](#functionality)
 - [Microservices Diagram](#microservices-diagram)
-- [ER Diagram](#microservices-diagram)
-- [Roles](#roles-)
-- [Use cases](#roles-)
-- [Sequence Diagrams](#sequence-diagrams)
 - [API Endpoints](#api-endpoints)
 - [Authorization Rules](#authorization-rules)
 
