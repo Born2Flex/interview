@@ -5,7 +5,10 @@ In addition, the application offers features for HR to search for specialists wi
 ## Contents
 
 - [Functionality](#functionality)
-- [UML Diagrams](#uml-diagrams-)
+- [Microservices Diagram](#microservices-diagram)
+- [ER Diagram](#microservices-diagram)
+- [Roles](#roles-)
+- [Use cases](#roles-)
 - [Sequence Diagrams](#sequence-diagrams)
 - [API Endpoints](#api-endpoints)
 - [Authorization Rules](#authorization-rules)
@@ -34,12 +37,83 @@ In addition, the application offers features for HR to search for specialists wi
 
 - **Interview reminders:** The user receives reminders about the interview via email and on the page.
 
-## UML Diagrams ???
+## Microservices Diagram
+<p align="center">
+  <img src="./imgs/microservices_architecture.png" alt="Microservices diagram"/>
+</p>
 
-## Sequence Diagrams
+[//]: # (![Microservices diagram]&#40;/imgs/microservices_architecture.png&#41;)
 
-### User Registration
-![User registration diagram](/imgs/user-registration-diagram.png)
+## ER Diagram
+<p align="center">
+  <img src="./imgs/er_diagram.png" alt="ER diagram"/>
+</p>
+
+[//]: # (![ER diagram]&#40;/imgs/er_diagram.png&#41;)
+
+## Roles
+![Roles](/imgs/roles.png)
+
+## Registration
+### Usecase
+<p align="center">
+  <img src="./imgs/registration_usecase.png" alt="Registration usecase diagram"/>
+</p>
+
+[//]: # (![Registration usecase diagram]&#40;/imgs/registration_usecase.png&#41;)
+### Sequence
+<p align="center">
+  <img src="./imgs/registration_sequence.png" alt="Registration sequence diagram"/>
+</p>
+
+[//]: # (![Registration sequence diagram]&#40;/imgs/registration_sequence.png&#41;)
+<p align="center">
+  <img src="./imgs/interviewer_verification_sequence.png" alt="Interviewer verification diagram"/>
+</p>
+
+[//]: # (![Interviewer verification diagram]&#40;/imgs/interviewer_verification_sequence.png&#41;)
+
+## Interview
+### Use case
+<p align="center">
+  <img src="./imgs/interview_usecase.png" alt="Interview usecase diagram"/>
+</p>
+
+[//]: # (![Interview usecase diagram]&#40;/imgs/interview_usecase.png&#41;)
+### Block schema
+<p align="center">
+  <img src="./imgs/interview_block_schema.png" alt="Interview block schema"/>
+</p>
+
+[//]: # (![Interview block schema]&#40;/imgs/interview_block_schema.png&#41;)
+## Skills
+### Skill tree structure
+<p align="center">
+  <img src="./imgs/skill_tree.png" alt="Skill tree"/>
+</p>
+
+[//]: # (![Skill tree]&#40;/imgs/skill_tree.png&#41;)
+### Skill match
+<p align="center">
+  <img src="./imgs/skill_match.png" alt="Skill match diagram"/>
+</p>
+
+[//]: # (![Skill match diagram]&#40;/imgs/skill_match.png&#41;)
+
+## Question bank
+### Questions source
+<p align="center">
+  <img src="./imgs/question_source.png" alt="Question source"/>
+</p>
+
+[//]: # (![Question source]&#40;/imgs/question_source.png&#41;)
+### Question bank filling
+<p align="center">
+  <img src="./imgs/question_bank_sequence.png" alt="Question bank"/>
+</p>
+
+[//]: # (![Question bank]&#40;/imgs/question_bank_sequence.png&#41;)
+
 
 ## API Endpoints
 
