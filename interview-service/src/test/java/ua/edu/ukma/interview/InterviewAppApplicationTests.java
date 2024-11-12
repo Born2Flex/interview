@@ -1,4 +1,4 @@
-package ua.edu.ukma.interviewapp;
+package ua.edu.ukma.interview;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

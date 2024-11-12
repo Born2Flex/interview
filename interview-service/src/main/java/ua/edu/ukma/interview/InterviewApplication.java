@@ -1,4 +1,4 @@
-package ua.edu.ukma.interviewapp;
+package ua.edu.ukma.interview;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

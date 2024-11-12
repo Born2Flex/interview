@@ -11,8 +11,8 @@
     <groupId>ua.edu.ukma</groupId>
     <artifactId>interview</artifactId>
     <version>0.0.1</version>
-    <name>interview-app</name>
-    <description>interview-app</description>
+    <name>interview-service</name>
+    <description>interview-service</description>
     <url/>
     <licenses>
         <license/>
@@ -67,11 +67,6 @@
                         <goals>
                             <goal>report</goal>
                         </goals>
-                        <configuration>
-                            <excludes>
-                                <exclude>**/InterviewApplication.java</exclude>
-                            </excludes>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -87,6 +82,7 @@
                 <version>3.6.0</version>
                 <configuration>
                     <configLocation>../checkstyle.xml</configLocation>
+                    <consoleOutput>true</consoleOutput>
                 </configuration>
             </plugin>
             <plugin>
