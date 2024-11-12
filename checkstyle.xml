@@ -15,11 +15,6 @@
 
 <module name="Checker">
     <property name="charset" value="UTF-8"/>
-
-
-    <module name="SuppressionFilter">
-        <property name="file" value="suppressions.xml"/>
-    </module>
     <property name="severity" value="error"/>
 
     <property name="fileExtensions" value="java, properties, xml"/>
