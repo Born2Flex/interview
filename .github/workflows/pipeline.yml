@@ -25,7 +25,7 @@ jobs:
       - name: Validate branch name
         uses: deepakputhraya/action-branch-name@master
         with:
-          regex: 'INT-\d+-\w+'
+          regex: 'INT-\d+-.+'
           ignore: main, dev
           min_length: 5
           max_length: 80
