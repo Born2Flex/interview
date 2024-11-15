@@ -31,7 +31,7 @@ jobs:
           max_length: 80
 
       - name: Run Unit Tests
-        run: mvn test --file interview-service/pom.xml
+        run: mvn test --file pom.xml
 
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@master
