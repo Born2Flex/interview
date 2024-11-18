@@ -3,10 +3,10 @@ name: Pipeline
 on:
   push:
     branches:
-      - main
-      - dev
+      - '*'
+      - '!main'
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [opened]
     branches: [main]
 
 jobs:
@@ -22,22 +22,29 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
+      - name: Validate branch name
+        uses: deepakputhraya/action-branch-name@master
+        with:
+          regex: 'INT-\d+-.+'
+          ignore: main, dev
+          min_length: 5
+          max_length: 80
+
       - name: Run Unit Tests
-        run: mvn test --file interview-service/pom.xml
+        run: mvn test --file pom.xml
 
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@master
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: 'https://sonarcloud.io/'
-          continue-on-error: 'true'
 
       - name: CheckStyle Linter
         uses: dbelyaev/action-checkstyle@master
         with:
           github_token: ${{ secrets.CHECKSTYLE_TOKEN }}
           reporter: github-pr-review
-#          level: warning
+          #          level: warning
           checkstyle_config: checkstyle.xml
 
       - name: Add coverage to PR
@@ -51,4 +58,3 @@ jobs:
           min-coverage-changed-files: 80
           update-comment: 'true'
           title: 'JaCoCo Report'
-          continue-on-error: 'true'

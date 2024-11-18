@@ -204,7 +204,6 @@
         <module name="CustomImportOrder">
             <property name="sortImportsInGroupAlphabetically" value="false"/>
             <property name="separateLineBetweenGroups" value="true"/>
-            <property name="customImportOrderRules" value="THIRD_PARTY_PACKAGE###SPECIAL_IMPORTS###STANDARD_JAVA_PACKAGE###STATIC"/>
             <property name="standardPackageRegExp" value="^(java.+)\."/>
         </module>
         <module name="MethodParamPad"/>
