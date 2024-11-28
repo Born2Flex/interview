@@ -1,4 +1,4 @@
-package ua.edu.ukma.interview;
+package ua.edu.internship.interview.web.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
