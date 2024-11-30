@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import ua.edu.internship.interview.service.utils.exceptions.BaseException;
-
 import java.util.HashMap;
 import java.util.Map;
 

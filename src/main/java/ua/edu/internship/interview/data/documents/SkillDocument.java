@@ -1,4 +1,4 @@
-package ua.edu.internship.interview.data.entity;
+package ua.edu.internship.interview.data.documents;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,7 +18,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 @Setter
 @Builder
 @Document(collection = "skills")
-public class SkillEntity {
+public class SkillDocument {
     @Id
     @EqualsAndHashCode.Include
     @Field(name = "id")

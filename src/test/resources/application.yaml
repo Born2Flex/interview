@@ -1,9 +1,3 @@
-spring:
-  application:
-    name: interview
-  data:
-    mongodb:
-      uri: mongodb://localhost:27017/interview
 mongock:
   migration-scan-package: ua.edu.internship.interview.config.migrations
 project:
