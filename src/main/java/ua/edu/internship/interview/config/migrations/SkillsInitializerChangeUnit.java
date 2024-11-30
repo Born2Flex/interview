@@ -5,9 +5,8 @@ import io.mongock.api.annotations.Execution;
 import io.mongock.api.annotations.RollbackExecution;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
-import ua.edu.internship.interview.data.entity.SkillEntity;
+import ua.edu.internship.interview.data.documents.SkillDocument;
 import ua.edu.internship.interview.data.repository.SkillRepository;
-
 import java.util.List;
 
 @ChangeUnit(id = "initialize-skills", order = "1")
@@ -17,7 +16,7 @@ public class SkillsInitializerChangeUnit {
 
     @Execution
     public void initializeSkillsHierarchy() {
-        SkillEntity root = skillRepository.save(SkillEntity.builder().name("Programming").build());
+        SkillDocument root = skillRepository.save(SkillDocument.builder().name("Programming").build());
 
         List<ObjectId> secondLevelSkills = saveChildSkills(root.getId(), List.of(
                 "Web Development", "Mobile Development", "Game Development", "Programming Languages"
@@ -42,20 +41,20 @@ public class SkillsInitializerChangeUnit {
     }
 
     private List<ObjectId> saveChildSkills(ObjectId parentId, List<String> skillNames) {
-        List<SkillEntity> skills = skillNames.stream()
+        List<SkillDocument> skills = skillNames.stream()
                 .map(name -> createSkillWithParentId(name, parentId))
                 .toList();
         return saveSkillsAndGetIds(skills);
     }
 
-    private SkillEntity createSkillWithParentId(String name, ObjectId parentId) {
-        return SkillEntity.builder().name(name).parentId(parentId).build();
+    private SkillDocument createSkillWithParentId(String name, ObjectId parentId) {
+        return SkillDocument.builder().name(name).parentId(parentId).build();
     }
 
-    private List<ObjectId> saveSkillsAndGetIds(List<SkillEntity> skills) {
-        List<SkillEntity> savedSkills = skillRepository.saveAll(skills);
+    private List<ObjectId> saveSkillsAndGetIds(List<SkillDocument> skills) {
+        List<SkillDocument> savedSkills = skillRepository.saveAll(skills);
         return savedSkills.stream()
-                .map(SkillEntity::getId)
+                .map(SkillDocument::getId)
                 .toList();
     }
 
@@ -64,4 +63,3 @@ public class SkillsInitializerChangeUnit {
         skillRepository.deleteAll();
     }
 }
-

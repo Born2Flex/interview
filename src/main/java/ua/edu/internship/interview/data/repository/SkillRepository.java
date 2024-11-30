@@ -2,12 +2,13 @@ package ua.edu.internship.interview.data.repository;
 
 import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.MongoRepository;
-import ua.edu.internship.interview.data.entity.SkillEntity;
-import ua.edu.internship.interview.service.dto.SkillTreeDto;
-
+import ua.edu.internship.interview.data.documents.SkillDocument;
+import ua.edu.internship.interview.service.dto.skill.SkillTreeDto;
 import java.util.List;
+import java.util.Optional;
 
-public interface SkillRepository extends MongoRepository<SkillEntity, String> {
+public interface SkillRepository extends MongoRepository<SkillDocument, String> {
+
     @Aggregation(pipeline = {
             """
             {
@@ -16,7 +17,22 @@ public interface SkillRepository extends MongoRepository<SkillEntity, String> {
               }
             }
             """,
+            "?#{ T(ua.edu.internship.interview.data.repository.SkillRepository).getChildLookUp()}"})
+    List<SkillTreeDto> findSkillTrees();
+
+    @Aggregation(pipeline = {
             """
+            {
+              $match: {
+                  _id: ?0
+              }
+            }
+            """,
+            "?#{ T(ua.edu.internship.interview.data.repository.SkillRepository).getChildLookUp()}"})
+    Optional<SkillTreeDto> findSkillTreeById(String id);
+
+    static String getChildLookUp() {
+        return """
             {
               $lookup: {
                 from: "skills",
@@ -43,6 +59,6 @@ public interface SkillRepository extends MongoRepository<SkillEntity, String> {
                 as: "children"
               }
             }
-            """})
-    List<SkillTreeDto> findSkillTree();
+            """;
+    }
 }
