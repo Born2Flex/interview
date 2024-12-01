@@ -6,19 +6,13 @@ import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 import ua.edu.internship.interview.data.documents.SkillDocument;
 import ua.edu.internship.interview.data.documents.UserQuestionDocument;
-import ua.edu.internship.interview.data.documents.UserSkillsDocument;
 import ua.edu.internship.interview.data.repository.SkillRepository;
 import ua.edu.internship.interview.data.repository.UserQuestionRepository;
-import ua.edu.internship.interview.data.repository.UserSkillRepository;
 import ua.edu.internship.interview.service.dto.user.question.UserQuestionCreateDto;
 import ua.edu.internship.interview.service.dto.user.question.UserQuestionDto;
 import ua.edu.internship.interview.service.dto.user.question.UserQuestionUpdateDto;
-import ua.edu.internship.interview.service.dto.user.skill.UserSkillsDto;
 import ua.edu.internship.interview.service.mapper.UserQuestionMapper;
-import ua.edu.internship.interview.service.mapper.UserSkillsMapper;
-import ua.edu.internship.interview.service.utils.exceptions.InvalidInputException;
 import ua.edu.internship.interview.service.utils.exceptions.NoSuchEntityException;
-
 import java.util.List;
 
 @Slf4j
@@ -26,7 +20,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserQuestionService {
     private final UserQuestionRepository userQuestionRepository;
-    private final UserSkillRepository userSkillRepository;
     private final SkillRepository skillRepository;
     private final UserQuestionMapper userQuestionMapper;
 
@@ -35,7 +28,7 @@ public class UserQuestionService {
         log.info("Fetched {} questions for user with id: {}", questions.size(), userId);
         return userQuestionMapper.toDto(questions);
     }
-    //TODO review
+
     public UserQuestionDto createUserQuestion(String userId, UserQuestionCreateDto questionDto) {
         log.info("Attempting to create new question for user with id: {}", userId);
         UserQuestionDocument questionDocument = userQuestionMapper.toDocument(userId, questionDto);
@@ -46,10 +39,10 @@ public class UserQuestionService {
         return userQuestionMapper.toDto(savedQuestion);
     }
 
-    public UserQuestionDto updateUserQuestion(String userId, String questionId, UserQuestionUpdateDto dto) {
+    public UserQuestionDto updateUserQuestion(String userId, String questionId, UserQuestionUpdateDto questionDto) {
         log.info("Attempting to update question with id: {} for user with id: {}", questionId, userId);
         UserQuestionDocument questionDocument = getQuestionByUserIdOrElseThrow(userId, questionId);
-        userQuestionMapper.updateDocument(dto, questionDocument);
+        userQuestionMapper.updateDocument(questionDto, questionDocument);
         UserQuestionDocument updatedQuestion = userQuestionRepository.save(questionDocument);
         log.info("Updated question with id: {} for user with id: {}", updatedQuestion.getId(), userId);
         return userQuestionMapper.toDto(updatedQuestion);
@@ -62,7 +55,8 @@ public class UserQuestionService {
     }
 
     public List<UserQuestionDto> getUserQuestionsBySkillId(String userId, String skillId) {
-        List<UserQuestionDocument> questions = userQuestionRepository.findAllByUserIdAndSkill_Id(userId, new ObjectId(skillId));
+        List<UserQuestionDocument> questions = userQuestionRepository
+                .findAllByUserIdAndSkill_Id(userId, new ObjectId(skillId));
         log.info("Fetched {} questions for skill with id: {} for user with id: {}", questions.size(), skillId, userId);
         return userQuestionMapper.toDto(questions);
     }

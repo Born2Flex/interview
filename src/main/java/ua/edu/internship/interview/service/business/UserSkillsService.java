@@ -31,9 +31,7 @@ public class UserSkillsService {
         log.info("Attempting to create skills document for user with id: {}", userId);
         validateUserSkillsNotExists(userId);
         List<SkillDocument> skills = getSkillsByIds(skillIds);
-        UserSkillsDocument userSkillsDocument = UserSkillsDocument.builder()
-                .userId(userId)
-                .skills(skills).build();
+        UserSkillsDocument userSkillsDocument = UserSkillsDocument.builder().userId(userId).skills(skills).build();
         UserSkillsDocument savedUserSkills = userSkillRepository.save(userSkillsDocument);
         log.info("Created skills document with id: {}, for user with id: {}", savedUserSkills.getId(), userId);
         return userSkillsMapper.toDto(savedUserSkills);
