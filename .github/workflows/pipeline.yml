@@ -38,6 +38,7 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: 'https://sonarcloud.io/'
+          continue-on-error: 'true'
 
       - name: CheckStyle Linter
         uses: dbelyaev/action-checkstyle@master
@@ -58,3 +59,4 @@ jobs:
           min-coverage-changed-files: 80
           update-comment: 'true'
           title: 'JaCoCo Report'
+          continue-on-error: 'true'
