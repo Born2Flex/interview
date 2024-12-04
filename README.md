@@ -1,9 +1,12 @@
-# Project
-This platform is designed to revolutionize the interview process by making it more efficient, transparent, and customized for both job seekers and interviewers. The goal is to simplify the hiring process, allowing candidates to better prepare for interviews and interviewers to find the best-fit candidates quickly. By offering comprehensive tools for all stages of the hiring process, the platform enhances the alignment between candidates and job openings, while providing an opportunity for young professionals to prepare effectively for their first interviews.
+# Interview
 
-The platform allows job seekers to create detailed profiles showcasing their skills and experience, while interviewers have access to a rich bank of categorized questions, enabling them to conduct more focused and relevant interviews. If a suitable question is not found, the interviewer can utilize LLM-generated questions that adapt to the candidate's skills and job requirements. This makes the process of preparing and conducting an interview more productive and structured.
+Interview management System is designed to simplify the interview process, making it more efficient and convenient for both interviewers and candidates. 
 
-Key features of the platform include intuitive scheduling tools and advanced search capabilities for HR professionals, enabling them to quickly identify candidates with the right skill sets. By seamlessly integrating these features, the platform simplify the hiring process, reduces administrative overhead, and ensures a more personalized and efficient interview experience. This not only accelerates the recruitment process but also enhances the quality of candidate assessments, leading to better alignment between job seekers and employers.
+Users can select and manage their skills with special skill-tree structure. Interview process is conducted based on the skills that intersects between the interviewer and the candidate. 
+During interview interviewers can select questions from a pool of saved ones, according to the skill, or generate new questions using the OpenAI API. Also, interviewer can quickly grade candidates' responses and provide immediate feedback in form of a grade from 0 to 100. 
+After the interview, interviewers provide detailed feedback to candidates where they write their impression and advices for improvement, candidates can then view their results and gain insights about their performance. 
+
+Future enhancements include implementing candidate search functionality based on skills and developing a graphical user interface to improve user experience.
 
 ## Documentation
 

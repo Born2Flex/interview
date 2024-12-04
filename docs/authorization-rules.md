@@ -1,11 +1,16 @@
 # Authorization Rules
 
-## User
+## Interviewer, Trainee
 **Permissions:**
 - Register and update personal profile with skills.
-- Participate in mock interviews.
-- View their own interview results and feedback.
+- Participate in interviews.
 - Receive interview reminders and notifications.
+
+## Interviewer
+**Permissions:**
+- Generate questions during interview.
+- Grade candidate answers.
+- Provide feedback.
 
 ## Admin
 **Permissions:**
