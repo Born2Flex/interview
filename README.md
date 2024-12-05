@@ -12,9 +12,9 @@ Future enhancements include implementing candidate search functionality based on
 
 The documentation is divided into several sections:
 
-- [Functionality](/docs/functionality.md)
-- [API Description](/docs/api_description.md)
-- [Roles](/docs/roles.md)
-- [Business Cases](/docs/business_cases.md)
-- [Architecture diagram](/docs/architecture_diagram.md)
-- [ER Diagram](/docs/er_diagram.md)
+- [Functionality](docs/functionality.md)
+- [API Description](docs/api_description.md)
+- [Roles](docs/roles.md)
+- [Business Cases](docs/business_cases.md)
+- [Architecture diagram](docs/architecture_diagram.md)
+- [ER Diagram](docs/er_diagram.md)
