@@ -18,3 +18,32 @@ The documentation is divided into several sections:
 - [Business Cases](docs/business_cases.md)
 - [Architecture diagram](docs/architecture_diagram.md)
 - [ER Diagram](docs/er_diagram.md)
+
+## Run locally
+
+### Database configuration
+
+Interview Service uses MongoDB. You can configure the database connection by specifying your `spring.data.mongo.uri` in `application.yaml`. 
+Or, if you have Docker installed, you can use the provided `docker-compose.yml` file to start the MongoDB container.
+
+To start the MongoDB container using Docker, run the following command:
+```bash
+docker compose up
+```
+
+### Build & Start
+
+Execute script to build and start Interview Service locally:
+```bash
+git clone https://github.com/Born2Flex/interview.git
+cd interview
+./mvnw package
+java -jar target/*.jar
+```
+Once the application started, you can access the Interview Service API at <http://localhost:8080/swagger-ui/index.html>.
+
+### File links
+|Spring Boot Configuration | Class or Java property files                                                                                                                                        |
+|--------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|The Main Class | [InterviewApplication](src/main/java/ua/edu/internship/interview/InterviewApplication.java) |
+|Properties Files | [application.yaml](src/main/resources/application.yaml)                                                                                                          |
