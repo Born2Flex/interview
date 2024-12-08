@@ -1,5 +1,10 @@
 package ua.edu.internship.interview.web.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -26,29 +31,50 @@ public class UserQuestionController {
     private final UserQuestionService service;
 
     @GetMapping
+    @Operation(summary = "Get user questions",
+            description = "Retrieves a list of all questions for a specific user.")
+    @ApiResponse(responseCode = "200", content = @Content(array = @ArraySchema(schema = @Schema(implementation = UserQuestionDto.class))))
+    @ApiResponse(responseCode = "404", description = "User not found")
     public List<UserQuestionDto> getUserQuestions(@PathVariable String userId) {
         return service.getUserQuestions(userId);
     }
 
     @PostMapping
+    @Operation(summary = "Create a new user question",
+            description = "Creates a new question for a specific user.")
+    @ApiResponse(responseCode = "201", content = @Content(schema = @Schema(implementation = UserQuestionDto.class)))
+    @ApiResponse(responseCode = "400", description = "Invalid input")
     @ResponseStatus(HttpStatus.CREATED)
     public UserQuestionDto createUserQuestion(@PathVariable String userId, @RequestBody UserQuestionCreateDto dto) {
         return service.createUserQuestion(userId, dto);
     }
 
     @PutMapping("/{questionId}")
+    @Operation(summary = "Update an existing user question",
+            description = "Updates an existing user question.")
+    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = UserQuestionDto.class)))
+    @ApiResponse(responseCode = "400", description = "Invalid input")
+    @ApiResponse(responseCode = "404", description = "User or question not found")
     public UserQuestionDto updateUserQuestion(@PathVariable String userId, @PathVariable String questionId,
                                               @RequestBody UserQuestionUpdateDto dto) {
         return service.updateUserQuestion(userId, questionId, dto);
     }
 
     @DeleteMapping("/{questionId}")
+    @Operation(summary = "Delete a user question",
+            description = "Deletes a specific question for a user.")
+    @ApiResponse(responseCode = "204", description = "Question deleted successfully")
+    @ApiResponse(responseCode = "404", description = "User or question not found")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUserQuestion(@PathVariable String userId, @PathVariable String questionId) {
         service.deleteUserQuestion(userId, questionId);
     }
 
     @GetMapping("/skill/{skillId}")
+    @Operation(summary = "Get user questions by skill",
+            description = "Retrieves questions related to a specific skill for a user.")
+    @ApiResponse(responseCode = "200", content = @Content(array = @ArraySchema(schema = @Schema(implementation = UserQuestionDto.class))))
+    @ApiResponse(responseCode = "404", description = "User or skill not found")
     public List<UserQuestionDto> getUserQuestionsBySkill(@PathVariable String userId, @PathVariable String skillId) {
         return service.getUserQuestionsBySkillId(userId, skillId);
     }

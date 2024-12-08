@@ -20,7 +20,7 @@ import java.util.List;
 @ExtendWith(MockitoExtension.class)
 class UserQuestionMapperTest {
     @Mock
-    private BaseMapper baseMapper; // Mock BaseMapper
+    private BaseMapper baseMapper;
     @Mock
     private SkillMapper skillMapper;
     @InjectMocks
