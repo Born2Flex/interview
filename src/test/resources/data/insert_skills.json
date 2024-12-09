@@ -1,0 +1,26 @@
+{
+  "insert": "skills",
+  "documents": [
+    {
+      "_id": {
+        "$oid": "67483c5c8e8573107761acf1"
+      },
+      "name": "Programming",
+      "_class": "ua.edu.internship.interview.data.entity.SkillEntity"
+    },
+    {
+      "_id": {
+        "$oid": "67483c5c8e8573107761acf2"
+      },
+      "name": "Web Development",
+      "_class": "ua.edu.internship.interview.data.entity.SkillEntity"
+    },
+    {
+      "_id": {
+        "$oid": "67483c5c8e8573107761acf3"
+      },
+      "name": "Database Architecture",
+      "_class": "ua.edu.internship.interview.data.entity.SkillEntity"
+    }
+  ]
+}

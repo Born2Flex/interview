@@ -1,5 +1,5 @@
 mongock:
-  migration-scan-package: ua.edu.internship.interview.config.migrations
+  enabled: false
 project:
   version: '@project.version@'
 domain:

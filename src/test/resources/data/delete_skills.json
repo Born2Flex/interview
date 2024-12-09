@@ -1,0 +1,9 @@
+{
+  "delete": "skills",
+  "deletes": [
+    {
+      "q": {},
+      "limit": 0
+    }
+  ]
+}
