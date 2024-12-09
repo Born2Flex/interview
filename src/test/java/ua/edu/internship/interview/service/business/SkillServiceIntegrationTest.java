@@ -1,9 +1,12 @@
 package ua.edu.internship.interview.service.business;
 
+import com.jupiter.tools.spring.test.mongo.annotation.MongoDataSet;
+import com.jupiter.tools.spring.test.mongo.junit5.meta.annotation.MongoDbIntegrationTest;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.MongoDBContainer;
@@ -20,11 +23,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.util.List;
 
 @SpringBootTest
+@MongoDbIntegrationTest
 @Testcontainers
 class SkillServiceIntegrationTest {
     @Container
     private static final MongoDBContainer mongoDBContainer =
             new MongoDBContainer(DockerImageName.parse("mongo:7.0.0"));
+    @Autowired
+    private MongoTemplate mongoTemplate;
     @Autowired
     private SkillRepository skillRepository;
     @Autowired
@@ -53,6 +59,7 @@ class SkillServiceIntegrationTest {
     }
 
     @Test
+    @MongoDataSet(value = "/", cleanAfter = true)
     void testGetSkillTreeByIdFound() {
         ObjectId id = new ObjectId();
         SkillDocument skillDocument = SkillDocument.builder()
