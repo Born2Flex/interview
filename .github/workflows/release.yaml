@@ -3,7 +3,7 @@ name: Release pipeline
 on:
   push:
     branches:
-      - "*"
+      - "main"
 
 env:
   build-number: ${GITHUB_RUN_NUMBER}
