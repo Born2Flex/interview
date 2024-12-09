@@ -24,7 +24,7 @@ class UserQuestionMapperTest {
     @Mock
     private SkillMapper skillMapper;
     @InjectMocks
-    private UserQuestionMapperImpl userQuestionMapper;
+    private UserQuestionMapperImpl underTest;
 
     @Test
     void toDto_shouldMapUserQuestionDocumentToUserQuestionDto() {
@@ -37,7 +37,7 @@ class UserQuestionMapperTest {
         userQuestionDocument.setType(QuestionType.SOFT_SKILLS);
         when(baseMapper.map(id)).thenReturn("123456789123456789123456");
 
-        UserQuestionDto result = userQuestionMapper.toDto(userQuestionDocument);
+        UserQuestionDto result = underTest.toDto(userQuestionDocument);
 
         assertNotNull(result);
         assertEquals(userQuestionDocument.getId(), new ObjectId(result.getId()));
@@ -57,7 +57,7 @@ class UserQuestionMapperTest {
         userQuestionDocument.setType(QuestionType.SOFT_SKILLS);
         List<UserQuestionDocument> documents = List.of(userQuestionDocument);
 
-        List<UserQuestionDto> result = userQuestionMapper.toDto(documents);
+        List<UserQuestionDto> result = underTest.toDto(documents);
 
         assertNotNull(result);
         assertEquals(1, result.size());
@@ -76,7 +76,7 @@ class UserQuestionMapperTest {
         userQuestionCreateDto.setDifficulty(QuestionDifficulty.MEDIUM);
         userQuestionCreateDto.setType(QuestionType.HARD_SKILLS);
 
-        UserQuestionDocument result = userQuestionMapper.toDocument("1", userQuestionCreateDto);
+        UserQuestionDocument result = underTest.toDocument("1", userQuestionCreateDto);
 
         assertNotNull(result);
         assertEquals("1", result.getUserId());
@@ -98,7 +98,7 @@ class UserQuestionMapperTest {
         userQuestionDocument.setDifficulty(QuestionDifficulty.HARD);
         userQuestionDocument.setType(QuestionType.SOFT_SKILLS);
 
-        userQuestionMapper.updateDocument(userQuestionUpdateDto, userQuestionDocument);
+        underTest.updateDocument(userQuestionUpdateDto, userQuestionDocument);
 
         assertNotNull(userQuestionDocument);
         assertEquals(userQuestionUpdateDto.getText(), userQuestionDocument.getText());
