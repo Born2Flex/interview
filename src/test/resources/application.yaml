@@ -1,0 +1,6 @@
+mongock:
+  enabled: false
+project:
+  version: '@project.version@'
+domain:
+  back: ${BACK_URI:http://localhost:8080}

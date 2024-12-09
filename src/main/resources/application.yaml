@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: interview
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/interview
+mongock:
+  migration-scan-package: ua.edu.internship.interview.config.migrations
+project:
+  version: '@project.version@'
+domain:
+  back: ${BACK_URI:http://localhost:8080}

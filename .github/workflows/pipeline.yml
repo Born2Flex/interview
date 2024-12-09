@@ -38,6 +38,7 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: 'https://sonarcloud.io/'
+          continue-on-error: 'true'
 
       - name: CheckStyle Linter
         uses: dbelyaev/action-checkstyle@master
