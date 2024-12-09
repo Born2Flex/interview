@@ -1,0 +1,6 @@
+mongock:
+  migration-scan-package: ua.edu.internship.interview.config.migrations
+project:
+  version: '@project.version@'
+domain:
+  back: ${BACK_URI:http://localhost:8080}
