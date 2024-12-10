@@ -59,4 +59,3 @@ jobs:
           min-coverage-changed-files: 80
           update-comment: 'true'
           title: 'JaCoCo Report'
-          continue-on-error: 'true'
