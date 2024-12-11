@@ -19,12 +19,12 @@ import java.util.List;
 public class UserSkillsService {
     private final UserSkillRepository userSkillRepository;
     private final SkillRepository skillRepository;
-    private final UserSkillsMapper userSkillsMapper;
+    private final UserSkillsMapper mapper;
 
     public UserSkillsDto getUserSkills(String userId) {
         UserSkillsDocument userSkillsDocument = getSkillsByUserIdOrElseThrow(userId);
         log.info("Retrieved {} skills for user with id: {}", userSkillsDocument.getSkills().size(), userId);
-        return userSkillsMapper.toDto(userSkillsDocument);
+        return mapper.toDto(userSkillsDocument);
     }
 
     public UserSkillsDto createUserSkills(String userId, List<String> skillIds) {
@@ -34,7 +34,7 @@ public class UserSkillsService {
         UserSkillsDocument userSkillsDocument = UserSkillsDocument.builder().userId(userId).skills(skills).build();
         UserSkillsDocument savedUserSkills = userSkillRepository.save(userSkillsDocument);
         log.info("Created skills document with id: {}, for user with id: {}", savedUserSkills.getId(), userId);
-        return userSkillsMapper.toDto(savedUserSkills);
+        return mapper.toDto(savedUserSkills);
     }
 
     public UserSkillsDto updateUserSkills(String userId, List<String> skillIds) {
@@ -44,7 +44,7 @@ public class UserSkillsService {
         userSkillsDocument.setSkills(skills);
         UserSkillsDocument updatedUserSkills = userSkillRepository.save(userSkillsDocument);
         log.info("Updated skills for user with id: {}", userId);
-        return userSkillsMapper.toDto(updatedUserSkills);
+        return mapper.toDto(updatedUserSkills);
     }
 
     private void validateUserSkillsNotExists(String userId) {

@@ -21,31 +21,31 @@ import java.util.List;
 public class UserQuestionService {
     private final UserQuestionRepository userQuestionRepository;
     private final SkillRepository skillRepository;
-    private final UserQuestionMapper userQuestionMapper;
+    private final UserQuestionMapper mapper;
 
     public List<UserQuestionDto> getUserQuestions(String userId) {
         List<UserQuestionDocument> questions = userQuestionRepository.findAllByUserId(userId);
         log.info("Retrieved {} questions for user with id: {}", questions.size(), userId);
-        return userQuestionMapper.toDto(questions);
+        return mapper.toDto(questions);
     }
 
-    public UserQuestionDto createUserQuestion(String userId, UserQuestionCreateDto questionDto) {
+    public UserQuestionDto createUserQuestion(String userId, UserQuestionCreateDto dto) {
         log.info("Attempting to create new question for user with id: {}", userId);
-        UserQuestionDocument questionDocument = userQuestionMapper.toDocument(userId, questionDto);
-        SkillDocument skill = getSkillByIdOrElseThrow(questionDto.getSkillId());
+        UserQuestionDocument questionDocument = mapper.toDocument(userId, dto);
+        SkillDocument skill = getSkillByIdOrElseThrow(dto.getSkillId());
         questionDocument.setSkill(skill);
         UserQuestionDocument savedQuestion = userQuestionRepository.save(questionDocument);
         log.info("Created new question with id: {} for user with id: {}", savedQuestion.getId(), userId);
-        return userQuestionMapper.toDto(savedQuestion);
+        return mapper.toDto(savedQuestion);
     }
 
-    public UserQuestionDto updateUserQuestion(String userId, String questionId, UserQuestionUpdateDto questionDto) {
+    public UserQuestionDto updateUserQuestion(String userId, String questionId, UserQuestionUpdateDto dto) {
         log.info("Attempting to update question with id: {} for user with id: {}", questionId, userId);
         UserQuestionDocument questionDocument = getQuestionByUserIdOrElseThrow(userId, questionId);
-        userQuestionMapper.updateDocument(questionDto, questionDocument);
+        mapper.updateDocument(dto, questionDocument);
         UserQuestionDocument updatedQuestion = userQuestionRepository.save(questionDocument);
         log.info("Updated question with id: {} for user with id: {}", updatedQuestion.getId(), userId);
-        return userQuestionMapper.toDto(updatedQuestion);
+        return mapper.toDto(updatedQuestion);
     }
 
     public void deleteUserQuestion(String userId, String questionId) {
@@ -58,7 +58,7 @@ public class UserQuestionService {
         List<UserQuestionDocument> questions = userQuestionRepository
                 .findAllByUserIdAndSkill_Id(userId, new ObjectId(skillId));
         log.info("Retrieved {} questions for skill with id: {} for user with id: {}", questions.size(), skillId, userId);
-        return userQuestionMapper.toDto(questions);
+        return mapper.toDto(questions);
     }
 
     private SkillDocument getSkillByIdOrElseThrow(String skillId) {
