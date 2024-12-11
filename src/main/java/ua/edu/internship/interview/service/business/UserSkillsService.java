@@ -23,7 +23,7 @@ public class UserSkillsService {
 
     public UserSkillsDto getUserSkills(String userId) {
         UserSkillsDocument userSkillsDocument = getSkillsByUserIdOrElseThrow(userId);
-        log.info("Fetched {} skills for user with id: {}", userSkillsDocument.getSkills().size(), userId);
+        log.info("Retrieved {} skills for user with id: {}", userSkillsDocument.getSkills().size(), userId);
         return userSkillsMapper.toDto(userSkillsDocument);
     }
 

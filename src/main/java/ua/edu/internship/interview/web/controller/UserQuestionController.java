@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -45,7 +46,7 @@ public class UserQuestionController {
     @ApiResponse(responseCode = "201", content = @Content(schema = @Schema(implementation = UserQuestionDto.class)))
     @ApiResponse(responseCode = "400", description = "Invalid input")
     @ResponseStatus(HttpStatus.CREATED)
-    public UserQuestionDto createUserQuestion(@PathVariable String userId, @RequestBody UserQuestionCreateDto dto) {
+    public UserQuestionDto createUserQuestion(@PathVariable String userId, @RequestBody @Valid UserQuestionCreateDto dto) {
         return service.createUserQuestion(userId, dto);
     }
 

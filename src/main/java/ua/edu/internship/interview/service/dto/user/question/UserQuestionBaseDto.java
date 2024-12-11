@@ -1,6 +1,7 @@
 package ua.edu.internship.interview.service.dto.user.question;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import ua.edu.internship.interview.data.enumeration.QuestionDifficulty;
@@ -13,6 +14,8 @@ public class UserQuestionBaseDto {
     private String text;
     @NotBlank
     private String skillId;
+    @NotNull
     private QuestionDifficulty difficulty;
+    @NotNull
     private QuestionType type;
 }
