@@ -6,7 +6,7 @@ import ua.edu.internship.interview.data.documents.UserQuestionDocument;
 import java.util.List;
 import java.util.Optional;
 
-public interface UserQuestionRepository extends MongoRepository<UserQuestionDocument, String> {
+public interface UserQuestionRepository extends MongoRepository<UserQuestionDocument, ObjectId> {
     List<UserQuestionDocument> findAllByUserId(String userId);
 
     List<UserQuestionDocument> findAllByUserIdAndSkill_Id(String userId, ObjectId skillId);
