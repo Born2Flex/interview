@@ -27,7 +27,7 @@ public class UserQuestionDocument {
     @Field(name = "id")
     private ObjectId id;
     @Field(name = "userId")
-    private String userId;
+    private Long userId;
     @DocumentReference
     private SkillDocument skill;
     @Field(name = "text")

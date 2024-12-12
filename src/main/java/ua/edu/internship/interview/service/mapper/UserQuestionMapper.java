@@ -17,7 +17,7 @@ public interface UserQuestionMapper {
     List<UserQuestionDto> toDto(List<UserQuestionDocument> documents);
 
     @Mapping(target = "userId", source = "userId")
-    UserQuestionDocument toDocument(String userId, UserQuestionCreateDto dto);
+    UserQuestionDocument toDocument(Long userId, UserQuestionCreateDto dto);
 
     void updateDocument(UserQuestionUpdateDto dto, @MappingTarget UserQuestionDocument entity);
 }

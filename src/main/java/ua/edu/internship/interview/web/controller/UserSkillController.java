@@ -31,7 +31,7 @@ public class UserSkillController {
             description = "Retrieves a list of skills associated with a specific user.")
     @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = UserSkillsDto.class)))
     @ApiResponse(responseCode = "404", description = "User not found")
-    public UserSkillsDto getSkillsByUserId(@PathVariable String userId) {
+    public UserSkillsDto getSkillsByUserId(@PathVariable Long userId) {
         return service.getUserSkills(userId);
     }
 
@@ -41,7 +41,7 @@ public class UserSkillController {
     @ApiResponse(responseCode = "201", content = @Content(schema = @Schema(implementation = UserSkillsDto.class)))
     @ApiResponse(responseCode = "400", description = "Invalid input")
     @ResponseStatus(HttpStatus.CREATED)
-    public UserSkillsDto createUserSkills(@PathVariable String userId, @RequestBody List<String> skillIds) {
+    public UserSkillsDto createUserSkills(@PathVariable Long userId, @RequestBody List<String> skillIds) {
         return service.createUserSkills(userId, skillIds);
     }
 
@@ -50,7 +50,7 @@ public class UserSkillController {
             description = "Updates the skills for a user based on skill IDs.")
     @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = UserSkillsDto.class)))
     @ApiResponse(responseCode = "400", description = "Invalid input")
-    public UserSkillsDto updateUserSkills(@PathVariable String userId, @RequestBody List<String> skillIds) {
+    public UserSkillsDto updateUserSkills(@PathVariable Long userId, @RequestBody List<String> skillIds) {
         return service.updateUserSkills(userId, skillIds);
     }
 }

@@ -31,7 +31,7 @@ class UserQuestionMapperTest {
         UserQuestionDocument userQuestionDocument = new UserQuestionDocument();
         ObjectId id = new ObjectId("123456789123456789123456");
         userQuestionDocument.setId(id);
-        userQuestionDocument.setUserId("1");
+        userQuestionDocument.setUserId(1L);
         userQuestionDocument.setText("Sample question text");
         userQuestionDocument.setDifficulty(QuestionDifficulty.HARD);
         userQuestionDocument.setType(QuestionType.SOFT_SKILLS);
@@ -51,7 +51,7 @@ class UserQuestionMapperTest {
     void toDto_shouldMapListOfUserQuestionDocumentsToListOfUserQuestionDtos() {
         UserQuestionDocument userQuestionDocument = new UserQuestionDocument();
         userQuestionDocument.setId(new ObjectId("123456789123456789123456"));
-        userQuestionDocument.setUserId("1");
+        userQuestionDocument.setUserId(1L);
         userQuestionDocument.setText("Sample question text");
         userQuestionDocument.setDifficulty(QuestionDifficulty.HARD);
         userQuestionDocument.setType(QuestionType.SOFT_SKILLS);
@@ -76,10 +76,10 @@ class UserQuestionMapperTest {
         userQuestionCreateDto.setDifficulty(QuestionDifficulty.MEDIUM);
         userQuestionCreateDto.setType(QuestionType.HARD_SKILLS);
 
-        UserQuestionDocument result = underTest.toDocument("1", userQuestionCreateDto);
+        UserQuestionDocument result = underTest.toDocument(1L, userQuestionCreateDto);
 
         assertNotNull(result);
-        assertEquals("1", result.getUserId());
+        assertEquals(1L, result.getUserId());
         assertEquals(userQuestionCreateDto.getText(), result.getText());
         assertEquals(userQuestionCreateDto.getDifficulty(), result.getDifficulty());
         assertEquals(userQuestionCreateDto.getType(), result.getType());

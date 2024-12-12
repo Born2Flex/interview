@@ -11,6 +11,6 @@ import java.util.List;
 @AllArgsConstructor
 public class UserSkillsDto {
     private String id;
-    private String userId;
+    private Long userId;
     private List<SkillDto> skills;
 }

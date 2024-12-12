@@ -44,22 +44,23 @@ class UserSkillsServiceTest {
 
     @BeforeEach
     void setUp() {
-        skillDocuments = List.of(buildSkillDoc("123456789123456789123456", "Java"),
-                buildSkillDoc("123456789123456789123456", "Kotlin"));
-        skillDTOs = List.of(buildSkillDto("1", "Java"), buildSkillDto("2", "Kotlin"));
+        skillDocuments = List.of(buildSkillDoc("123456789123456789123451", "Java"),
+                buildSkillDoc("123456789123456789123452", "Kotlin"));
+        skillDTOs = List.of(buildSkillDto("123456789123456789123451", "Java"),
+                buildSkillDto("123456789123456789123452", "Kotlin"));
 
         userSkillsDocument = new UserSkillsDocument();
-        userSkillsDocument.setUserId("1");
+        userSkillsDocument.setUserId(1L);
         userSkillsDocument.setSkills(skillDocuments);
 
         userSkillsDto = new UserSkillsDto();
-        userSkillsDto.setUserId("1");
+        userSkillsDto.setUserId(1L);
         userSkillsDto.setSkills(skillDTOs);
     }
 
     @Test
     void getUserSkills_shouldReturnUserSkillsDto_whenSkillsExist() {
-        String userId = "1";
+        Long userId = 1L;
         when(userSkillRepository.findByUserId(userId)).thenReturn(Optional.of(userSkillsDocument));
         when(userSkillsMapper.toDto(userSkillsDocument)).thenReturn(userSkillsDto);
 
@@ -75,7 +76,7 @@ class UserSkillsServiceTest {
 
     @Test
     void getUserSkills_shouldThrowNoSuchEntityException_whenUserSkillsNotFound() {
-        String userId = "999";
+        Long userId = 999L;
         when(userSkillRepository.findByUserId(userId)).thenReturn(Optional.empty());
 
         assertThrows(NoSuchEntityException.class, () -> underTest.getUserSkills(userId));
@@ -84,20 +85,20 @@ class UserSkillsServiceTest {
 
     @Test
     void createUserSkills_shouldCreateUserSkillsDocument_whenUserSkillsDocumentNotExist() {
-        String userId = "1";
+        Long userId = 1L;
         String skillId1 = "123456789123456789123451";
         String skillId2 = "123456789123456789123452";
-        List<String> skillIds = List.of(skillId1, skillId2);
         List<ObjectId> skillObjectIds = List.of(new ObjectId(skillId1), new ObjectId(skillId2));
+
         when(userSkillRepository.findByUserId(userId)).thenReturn(Optional.empty());
         when(skillRepository.findAllById(skillObjectIds)).thenReturn(skillDocuments);
         when(userSkillRepository.save(any(UserSkillsDocument.class))).thenReturn(userSkillsDocument);
         when(userSkillsMapper.toDto(userSkillsDocument)).thenReturn(userSkillsDto);
 
-        UserSkillsDto result = underTest.createUserSkills(userId, skillIds);
+        UserSkillsDto result = underTest.createUserSkills(userId, List.of(skillId1, skillId2));
 
         assertNotNull(result);
-        assertEquals("1", result.getUserId());
+        assertEquals(userId, result.getUserId());
         assertEquals(skillObjectIds.size(), result.getSkills().size());
         matchSkillFields(skillDTOs.getFirst(), result.getSkills().getFirst());
         matchSkillFields(skillDTOs.getLast(), result.getSkills().getLast());
@@ -106,27 +107,27 @@ class UserSkillsServiceTest {
 
     @Test
     void createUserSkills_shouldThrowInvalidInputException_whenUserSkillsExist() {
-        String userId = "1";
-        List<String> emptyList = Collections.emptyList();
+        Long userId = 1L;
+        List<String> list = Collections.emptyList();
         when(userSkillRepository.findByUserId(userId)).thenReturn(Optional.of(userSkillsDocument));
 
-        assertThrows(InvalidInputException.class, () -> underTest.createUserSkills(userId, emptyList));
+        assertThrows(InvalidInputException.class, () -> underTest.createUserSkills(userId, list));
         verify(userSkillRepository).findByUserId(userId);
     }
 
     @Test
     void updateUserSkills_shouldUpdateUserSkills_whenUserSkillsExist() {
-        String userId = "1";
+        Long userId = 1L;
         String skillId1 = "123456789123456789123451";
         String skillId2 = "123456789123456789123453";
         List<String> skillIds = List.of(skillId1, skillId2);
         List<ObjectId> skillObjectIds = List.of(new ObjectId(skillId1), new ObjectId(skillId2));
-        skillDocuments = List.of(buildSkillDoc("123456789123456789123456", "Java"),
-                buildSkillDoc("123456789123456789123456", "C++"));
-        skillDTOs = List.of(buildSkillDto("123456789123456789123456", "Java"),
-                buildSkillDto("123456789123456789123456", "Kotlin"));
-
+        skillDocuments = List.of(buildSkillDoc("123456789123456789123451", "Java"),
+                buildSkillDoc("123456789123456789123453", "C++"));
+        skillDTOs = List.of(buildSkillDto("123456789123456789123451", "Java"),
+                buildSkillDto("123456789123456789123453", "Kotlin"));
         userSkillsDto.setSkills(skillDTOs);
+
         when(userSkillRepository.findByUserId(userId)).thenReturn(Optional.of(userSkillsDocument));
         when(skillRepository.findAllById(skillObjectIds)).thenReturn(skillDocuments);
         when(userSkillRepository.save(userSkillsDocument)).thenReturn(userSkillsDocument);
@@ -144,7 +145,7 @@ class UserSkillsServiceTest {
 
     @Test
     void updateUserSkills_shouldThrowNoSuchEntityException_whenUserSkillsNotFound() {
-        String userId = "1";
+        Long userId = 1L;
         List<String> emptyList = Collections.emptyList();
         when(userSkillRepository.findByUserId(userId)).thenReturn(Optional.empty());
 
@@ -154,7 +155,7 @@ class UserSkillsServiceTest {
 
     @Test
     void createUserSkills_shouldThrowInvalidInputException_whenPassedInvalidSkillIds() {
-        String userId = "1";
+        Long userId = 1L;
         String skillId = "123456789123456789123456";
         ObjectId skillObjectId = new ObjectId(skillId);
         List<String> invalidSkillIds = List.of(skillId);
@@ -166,7 +167,7 @@ class UserSkillsServiceTest {
 
     @Test
     void updateUserSkills_shouldThrowInvalidInputException_whenPassedInvalidSkillIds() {
-        String userId = "1";
+        Long userId = 1L;
         String skillId = "123456789123456789123456";
         ObjectId skillObjectId = new ObjectId(skillId);
         List<String> invalidSkillIds = List.of(skillId);

@@ -36,7 +36,7 @@ public class UserQuestionController {
             description = "Retrieves a list of all questions for a specific user.")
     @ApiResponse(responseCode = "200", content = @Content(array = @ArraySchema(schema = @Schema(implementation = UserQuestionDto.class))))
     @ApiResponse(responseCode = "404", description = "User not found")
-    public List<UserQuestionDto> getUserQuestions(@PathVariable String userId) {
+    public List<UserQuestionDto> getUserQuestions(@PathVariable Long userId) {
         return service.getUserQuestions(userId);
     }
 
@@ -46,7 +46,7 @@ public class UserQuestionController {
     @ApiResponse(responseCode = "201", content = @Content(schema = @Schema(implementation = UserQuestionDto.class)))
     @ApiResponse(responseCode = "400", description = "Invalid input")
     @ResponseStatus(HttpStatus.CREATED)
-    public UserQuestionDto createUserQuestion(@PathVariable String userId, @RequestBody @Valid UserQuestionCreateDto dto) {
+    public UserQuestionDto createUserQuestion(@PathVariable Long userId, @RequestBody @Valid UserQuestionCreateDto dto) {
         return service.createUserQuestion(userId, dto);
     }
 
@@ -56,7 +56,7 @@ public class UserQuestionController {
     @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = UserQuestionDto.class)))
     @ApiResponse(responseCode = "400", description = "Invalid input")
     @ApiResponse(responseCode = "404", description = "User or question not found")
-    public UserQuestionDto updateUserQuestion(@PathVariable String userId, @PathVariable String questionId,
+    public UserQuestionDto updateUserQuestion(@PathVariable Long userId, @PathVariable String questionId,
                                               @RequestBody UserQuestionUpdateDto dto) {
         return service.updateUserQuestion(userId, questionId, dto);
     }
@@ -67,7 +67,7 @@ public class UserQuestionController {
     @ApiResponse(responseCode = "204", description = "Question deleted successfully")
     @ApiResponse(responseCode = "404", description = "User or question not found")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteUserQuestion(@PathVariable String userId, @PathVariable String questionId) {
+    public void deleteUserQuestion(@PathVariable Long userId, @PathVariable String questionId) {
         service.deleteUserQuestion(userId, questionId);
     }
 
@@ -76,7 +76,7 @@ public class UserQuestionController {
             description = "Retrieves questions related to a specific skill for a user.")
     @ApiResponse(responseCode = "200", content = @Content(array = @ArraySchema(schema = @Schema(implementation = UserQuestionDto.class))))
     @ApiResponse(responseCode = "404", description = "User or skill not found")
-    public List<UserQuestionDto> getUserQuestionsBySkill(@PathVariable String userId, @PathVariable String skillId) {
+    public List<UserQuestionDto> getUserQuestionsBySkill(@PathVariable Long userId, @PathVariable String skillId) {
         return service.getUserQuestionsBySkillId(userId, skillId);
     }
 }

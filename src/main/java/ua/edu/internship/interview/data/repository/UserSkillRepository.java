@@ -6,5 +6,5 @@ import ua.edu.internship.interview.data.documents.UserSkillsDocument;
 import java.util.Optional;
 
 public interface UserSkillRepository extends MongoRepository<UserSkillsDocument, ObjectId> {
-    Optional<UserSkillsDocument> findByUserId(String userId);
+    Optional<UserSkillsDocument> findByUserId(Long userId);
 }

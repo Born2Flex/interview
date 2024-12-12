@@ -10,6 +10,6 @@ import ua.edu.internship.interview.service.dto.skill.SkillDto;
 @EqualsAndHashCode(callSuper = true)
 public class UserQuestionDto extends UserQuestionBaseDto {
     private String id;
-    private String userId;
+    private Long userId;
     private SkillDto skill;
 }

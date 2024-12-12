@@ -26,7 +26,7 @@ public class UserSkillsDocument {
     @Field(name = "id")
     private ObjectId id;
     @Field(name = "userId")
-    private String userId;
+    private Long userId;
     @Field(name = "skillIds")
     @DocumentReference
     private List<SkillDocument> skills;

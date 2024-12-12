@@ -7,11 +7,11 @@ import java.util.List;
 import java.util.Optional;
 
 public interface UserQuestionRepository extends MongoRepository<UserQuestionDocument, ObjectId> {
-    List<UserQuestionDocument> findAllByUserId(String userId);
+    List<UserQuestionDocument> findAllByUserId(Long userId);
 
-    List<UserQuestionDocument> findAllByUserIdAndSkill_Id(String userId, ObjectId skillId);
+    List<UserQuestionDocument> findAllByUserIdAndSkill_Id(Long userId, ObjectId skillId);
 
-    Optional<UserQuestionDocument> findByUserIdAndId(String userId, ObjectId id);
+    Optional<UserQuestionDocument> findByUserIdAndId(Long userId, ObjectId id);
 
-    void deleteByUserIdAndSkill_Id(String userId, ObjectId skillId);
+    void deleteByUserIdAndSkill_Id(Long userId, ObjectId skillId);
 }

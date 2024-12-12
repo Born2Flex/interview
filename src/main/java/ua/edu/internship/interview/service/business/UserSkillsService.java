@@ -22,13 +22,13 @@ public class UserSkillsService {
     private final SkillRepository skillRepository;
     private final UserSkillsMapper mapper;
 
-    public UserSkillsDto getUserSkills(String userId) {
+    public UserSkillsDto getUserSkills(Long userId) {
         UserSkillsDocument userSkillsDocument = getSkillsByUserIdOrElseThrow(userId);
         log.info("Retrieved {} skills for user with id: {}", userSkillsDocument.getSkills().size(), userId);
         return mapper.toDto(userSkillsDocument);
     }
 
-    public UserSkillsDto createUserSkills(String userId, List<String> skillIds) {
+    public UserSkillsDto createUserSkills(Long userId, List<String> skillIds) {
         log.info("Attempting to create skills document for user with id: {}", userId);
         validateUserSkillsNotExists(userId);
         List<SkillDocument> skills = getSkillsByIds(skillIds);
@@ -38,7 +38,7 @@ public class UserSkillsService {
         return mapper.toDto(savedUserSkills);
     }
 
-    public UserSkillsDto updateUserSkills(String userId, List<String> skillIds) {
+    public UserSkillsDto updateUserSkills(Long userId, List<String> skillIds) {
         log.info("Attempting to update skills for user with id: {}", userId);
         UserSkillsDocument userSkillsDocument = getSkillsByUserIdOrElseThrow(userId);
         List<SkillDocument> skills = getSkillsByIds(skillIds);
@@ -48,7 +48,7 @@ public class UserSkillsService {
         return mapper.toDto(updatedUserSkills);
     }
 
-    private void validateUserSkillsNotExists(String userId) {
+    private void validateUserSkillsNotExists(Long userId) {
         userSkillRepository.findByUserId(userId).ifPresent(this::throwInvalidInputException);
     }
 
@@ -64,7 +64,7 @@ public class UserSkillsService {
         return skills;
     }
 
-    private UserSkillsDocument getSkillsByUserIdOrElseThrow(String userId) {
+    private UserSkillsDocument getSkillsByUserIdOrElseThrow(Long userId) {
         return userSkillRepository.findByUserId(userId)
                 .orElseThrow(() -> new NoSuchEntityException("User skills not found"));
     }
