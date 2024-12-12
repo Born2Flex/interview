@@ -2,6 +2,7 @@ package ua.edu.internship.interview.service.business;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 import ua.edu.internship.interview.data.documents.SkillDocument;
 import ua.edu.internship.interview.data.documents.UserSkillsDocument;
@@ -56,7 +57,7 @@ public class UserSkillsService {
     }
 
     private List<SkillDocument> getSkillsByIds(List<String> skillIds) {
-        List<SkillDocument> skills = skillRepository.findAllById(skillIds);
+        List<SkillDocument> skills = skillRepository.findAllById(skillIds.stream().map(ObjectId::new).toList());
         if (skills.size() != skillIds.size()) {
             throw new InvalidInputException("Provided invalid skill id");
         }

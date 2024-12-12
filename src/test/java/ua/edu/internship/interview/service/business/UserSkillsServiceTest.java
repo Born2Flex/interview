@@ -19,9 +19,10 @@ import ua.edu.internship.interview.service.utils.exceptions.NoSuchEntityExceptio
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.any;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -66,15 +67,15 @@ class UserSkillsServiceTest {
 
         assertNotNull(result);
         assertEquals(userId, result.getUserId());
-        assertEquals(2, result.getSkills().size());
+        assertEquals(skillDTOs.size(), result.getSkills().size());
         matchSkillFields(skillDTOs.getFirst(), result.getSkills().getFirst());
         matchSkillFields(skillDTOs.getLast(), result.getSkills().getLast());
-        verify(userSkillRepository).findByUserId("1");
+        verify(userSkillRepository).findByUserId(userId);
     }
 
     @Test
     void getUserSkills_shouldThrowNoSuchEntityException_whenUserSkillsNotFound() {
-        String userId = "1";
+        String userId = "999";
         when(userSkillRepository.findByUserId(userId)).thenReturn(Optional.empty());
 
         assertThrows(NoSuchEntityException.class, () -> underTest.getUserSkills(userId));
@@ -84,9 +85,12 @@ class UserSkillsServiceTest {
     @Test
     void createUserSkills_shouldCreateUserSkillsDocument_whenUserSkillsDocumentNotExist() {
         String userId = "1";
-        List<String> skillIds = List.of("1", "2");
+        String skillId1 = "123456789123456789123451";
+        String skillId2 = "123456789123456789123452";
+        List<String> skillIds = List.of(skillId1, skillId2);
+        List<ObjectId> skillObjectIds = List.of(new ObjectId(skillId1), new ObjectId(skillId2));
         when(userSkillRepository.findByUserId(userId)).thenReturn(Optional.empty());
-        when(skillRepository.findAllById(skillIds)).thenReturn(skillDocuments);
+        when(skillRepository.findAllById(skillObjectIds)).thenReturn(skillDocuments);
         when(userSkillRepository.save(any(UserSkillsDocument.class))).thenReturn(userSkillsDocument);
         when(userSkillsMapper.toDto(userSkillsDocument)).thenReturn(userSkillsDto);
 
@@ -94,33 +98,37 @@ class UserSkillsServiceTest {
 
         assertNotNull(result);
         assertEquals("1", result.getUserId());
-        assertEquals(2, result.getSkills().size());
-        assertEquals("Java", result.getSkills().getFirst().getName());
-        assertEquals("Kotlin", result.getSkills().getLast().getName());
+        assertEquals(skillObjectIds.size(), result.getSkills().size());
+        matchSkillFields(skillDTOs.getFirst(), result.getSkills().getFirst());
+        matchSkillFields(skillDTOs.getLast(), result.getSkills().getLast());
         verify(userSkillRepository).save(userSkillsDocument);
     }
 
     @Test
     void createUserSkills_shouldThrowInvalidInputException_whenUserSkillsExist() {
         String userId = "1";
-        List<String> skillIds = List.of(userId);
+        List<String> emptyList = Collections.emptyList();
         when(userSkillRepository.findByUserId(userId)).thenReturn(Optional.of(userSkillsDocument));
 
-        assertThrows(InvalidInputException.class, () -> underTest.createUserSkills(userId, skillIds));
+        assertThrows(InvalidInputException.class, () -> underTest.createUserSkills(userId, emptyList));
         verify(userSkillRepository).findByUserId(userId);
     }
 
     @Test
     void updateUserSkills_shouldUpdateUserSkills_whenUserSkillsExist() {
         String userId = "1";
-        List<String> skillIds = List.of("1", "3");
+        String skillId1 = "123456789123456789123451";
+        String skillId2 = "123456789123456789123453";
+        List<String> skillIds = List.of(skillId1, skillId2);
+        List<ObjectId> skillObjectIds = List.of(new ObjectId(skillId1), new ObjectId(skillId2));
         skillDocuments = List.of(buildSkillDoc("123456789123456789123456", "Java"),
                 buildSkillDoc("123456789123456789123456", "C++"));
         skillDTOs = List.of(buildSkillDto("123456789123456789123456", "Java"),
                 buildSkillDto("123456789123456789123456", "Kotlin"));
+
         userSkillsDto.setSkills(skillDTOs);
         when(userSkillRepository.findByUserId(userId)).thenReturn(Optional.of(userSkillsDocument));
-        when(skillRepository.findAllById(skillIds)).thenReturn(skillDocuments);
+        when(skillRepository.findAllById(skillObjectIds)).thenReturn(skillDocuments);
         when(userSkillRepository.save(userSkillsDocument)).thenReturn(userSkillsDocument);
         when(userSkillsMapper.toDto(userSkillsDocument)).thenReturn(userSkillsDto);
 
@@ -136,33 +144,38 @@ class UserSkillsServiceTest {
 
     @Test
     void updateUserSkills_shouldThrowNoSuchEntityException_whenUserSkillsNotFound() {
-        String skillId = "1";
-        List<String> skillIds = List.of(skillId);
-        when(userSkillRepository.findByUserId(skillId)).thenReturn(Optional.empty());
+        String userId = "1";
+        List<String> emptyList = Collections.emptyList();
+        when(userSkillRepository.findByUserId(userId)).thenReturn(Optional.empty());
 
-        assertThrows(NoSuchEntityException.class, () -> underTest.updateUserSkills(skillId, skillIds));
-        verify(userSkillRepository).findByUserId(skillId);
+        assertThrows(NoSuchEntityException.class, () -> underTest.updateUserSkills(userId, emptyList));
+        verify(userSkillRepository).findByUserId(userId);
     }
 
     @Test
     void createUserSkills_shouldThrowInvalidInputException_whenPassedInvalidSkillIds() {
-        String userId = "user1";
-        List<String> invalidSkillIds = List.of("999");
-        when(skillRepository.findAllById(invalidSkillIds)).thenReturn(List.of());
+        String userId = "1";
+        String skillId = "123456789123456789123456";
+        ObjectId skillObjectId = new ObjectId(skillId);
+        List<String> invalidSkillIds = List.of(skillId);
+        when(skillRepository.findAllById(List.of(skillObjectId))).thenReturn(List.of());
+
         assertThrows(InvalidInputException.class, () -> underTest.createUserSkills(userId, invalidSkillIds));
-        verify(skillRepository).findAllById(invalidSkillIds);
+        verify(skillRepository).findAllById(List.of(skillObjectId));
     }
 
     @Test
     void updateUserSkills_shouldThrowInvalidInputException_whenPassedInvalidSkillIds() {
-        String userId = "user1";
-        List<String> invalidSkillIds = List.of("999");
+        String userId = "1";
+        String skillId = "123456789123456789123456";
+        ObjectId skillObjectId = new ObjectId(skillId);
+        List<String> invalidSkillIds = List.of(skillId);
         when(userSkillRepository.findByUserId(userId)).thenReturn(Optional.of(userSkillsDocument));
-        when(skillRepository.findAllById(invalidSkillIds)).thenReturn(List.of());
-        assertThrows(InvalidInputException.class, () -> underTest.updateUserSkills(userId, invalidSkillIds));
+        when(skillRepository.findAllById(List.of(skillObjectId))).thenReturn(List.of());
 
+        assertThrows(InvalidInputException.class, () -> underTest.updateUserSkills(userId, invalidSkillIds));
         verify(userSkillRepository).findByUserId(userId);
-        verify(skillRepository).findAllById(invalidSkillIds);
+        verify(skillRepository).findAllById(List.of(skillObjectId));
     }
 
     private void matchSkillFields(SkillDto expected, SkillDto actual) {

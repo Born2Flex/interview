@@ -83,9 +83,10 @@ class UserQuestionServiceTest {
     void createUserQuestion_shouldCreateAndReturnUserQuestionDto() {
         String userId = "1";
         String skillId = "123456789123456789123456";
+        ObjectId objectId = new ObjectId(skillId);
         UserQuestionCreateDto createDto = new UserQuestionCreateDto();
         createDto.setSkillId(skillId);
-        when(skillRepository.findById(skillId)).thenReturn(Optional.of(skillDocument));
+        when(skillRepository.findById(objectId)).thenReturn(Optional.of(skillDocument));
         when(userQuestionMapper.toDocument(userId, createDto)).thenReturn(userQuestionDocument);
         when(userQuestionRepository.save(userQuestionDocument)).thenReturn(userQuestionDocument);
         when(userQuestionMapper.toDto(userQuestionDocument)).thenReturn(userQuestionDto);
@@ -95,7 +96,7 @@ class UserQuestionServiceTest {
         assertNotNull(result);
         matchQuestionFields(userQuestionDto, result);
         verify(userQuestionRepository).save(userQuestionDocument);
-        verify(skillRepository).findById("123456789123456789123456");
+        verify(skillRepository).findById(objectId);
         verify(userQuestionMapper).toDocument(userId, createDto);
         verify(userQuestionRepository).save(userQuestionDocument);
         verify(userQuestionMapper).toDto(userQuestionDocument);
@@ -104,12 +105,14 @@ class UserQuestionServiceTest {
     @Test
     void createUserQuestion_shouldThrowNoSuchEntityException_whenSkillNotFound() {
         String userId = "1";
+        String skillId = "123456789123456789123456";
+        ObjectId objectId = new ObjectId(skillId);
         UserQuestionCreateDto questionDto = new UserQuestionCreateDto();
-        questionDto.setSkillId("999");
-        when(skillRepository.findById("999")).thenReturn(Optional.empty());
+        questionDto.setSkillId("123456789123456789123456");
+        when(skillRepository.findById(objectId)).thenReturn(Optional.empty());
 
         assertThrows(NoSuchEntityException.class, () -> underTest.createUserQuestion(userId, questionDto));
-        verify(skillRepository).findById("999");
+        verify(skillRepository).findById(objectId);
     }
 
     @Test
@@ -121,6 +124,24 @@ class UserQuestionServiceTest {
 
         assertThrows(NoSuchEntityException.class, () -> underTest.updateUserQuestion(userId, questionId, questionDto));
         verify(userQuestionRepository).findByUserIdAndId(userId, new ObjectId(questionId));
+    }
+
+    @Test
+    void updateUserQuestion_shouldUpdateAndReturnUserQuestionDto_whenQuestionExists() {
+        String userId = "1";
+        String questionId = "123456789123456789123456";
+        UserQuestionUpdateDto updateDto = new UserQuestionUpdateDto();
+        when(userQuestionRepository.findByUserIdAndId(userId, new ObjectId(questionId))).thenReturn(Optional.of(userQuestionDocument));
+        when(userQuestionRepository.save(userQuestionDocument)).thenReturn(userQuestionDocument);
+        when(userQuestionMapper.toDto(userQuestionDocument)).thenReturn(userQuestionDto);
+
+        UserQuestionDto result = underTest.updateUserQuestion(userId, questionId, updateDto);
+
+        assertNotNull(result);
+        matchQuestionFields(userQuestionDto, result);
+        verify(userQuestionRepository).findByUserIdAndId(userId, new ObjectId(questionId));
+        verify(userQuestionRepository).save(userQuestionDocument);
+        verify(userQuestionMapper).toDto(userQuestionDocument);
     }
 
     @Test

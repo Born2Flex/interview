@@ -62,7 +62,7 @@ public class UserQuestionService {
     }
 
     private SkillDocument getSkillByIdOrElseThrow(String skillId) {
-        return skillRepository.findById(skillId).orElseThrow(() -> new NoSuchEntityException("Skill not found"));
+        return skillRepository.findById(new ObjectId(skillId)).orElseThrow(() -> new NoSuchEntityException("Skill not found"));
     }
 
     private UserQuestionDocument getQuestionByUserIdOrElseThrow(String userId, String questionId) {

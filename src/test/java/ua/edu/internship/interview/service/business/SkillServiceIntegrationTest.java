@@ -13,26 +13,26 @@ import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
+import ua.edu.internship.interview.service.BaseIntegrationTest;
 import ua.edu.internship.interview.service.dto.skill.SkillTreeDto;
 import ua.edu.internship.interview.service.utils.exceptions.NoSuchEntityException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.List;
 
 @SpringBootTest
 @Testcontainers
-class SkillServiceIntegrationTest {
+class SkillServiceIntegrationTest extends BaseIntegrationTest {
     @Container
-    private static final MongoDBContainer mongoDBContainer =
-            new MongoDBContainer(DockerImageName.parse("mongo:7.0.0"));
-    @Autowired
-    private MongoTemplate mongoTemplate;
+    private static final MongoDBContainer mongoDBContainer = new MongoDBContainer(DockerImageName.parse("mongo:7.0.0"));
     @Autowired
     private SkillService skillService;
+
+    public SkillServiceIntegrationTest(@Autowired MongoTemplate mongoTemplate) {
+        super(mongoTemplate);
+    }
 
     @DynamicPropertySource
     static void setProperties(DynamicPropertyRegistry registry) {
@@ -76,12 +76,5 @@ class SkillServiceIntegrationTest {
         assertNotNull(retrievedSkillTree);
         assertEquals(objectId, retrievedSkillTree.getId());
         assertEquals("Database Architecture", retrievedSkillTree.getName());
-    }
-
-    private static final String FILE_PREFIX = "src/test/resources/data/";
-
-    private void executeQueryFromFile(String fileName) throws IOException {
-        String query = new String(Files.readAllBytes(Paths.get(FILE_PREFIX + fileName)));
-        mongoTemplate.executeCommand(query);
     }
 }
