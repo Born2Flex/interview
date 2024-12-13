@@ -9,7 +9,7 @@ import java.util.Optional;
 public interface UserQuestionRepository extends MongoRepository<UserQuestionDocument, ObjectId> {
     List<UserQuestionDocument> findAllByUserId(Long userId);
 
-    List<UserQuestionDocument> findAllByUserIdAndSkill_Id(Long userId, ObjectId skillId);
+    List<UserQuestionDocument> findAllByUserIdAndSkillId(Long userId, ObjectId skillId);
 
     Optional<UserQuestionDocument> findByIdAndUserId(ObjectId id, Long userId);
 

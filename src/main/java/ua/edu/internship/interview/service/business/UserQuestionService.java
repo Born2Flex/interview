@@ -58,7 +58,7 @@ public class UserQuestionService {
 
     public List<UserQuestionDto> getUserQuestionsBySkillId(Long userId, String skillId) {
         List<UserQuestionDocument> questions = userQuestionRepository
-                .findAllByUserIdAndSkill_Id(userId, new ObjectId(skillId));
+                .findAllByUserIdAndSkillId(userId, new ObjectId(skillId));
         log.info("Retrieved {} questions for skill with id: {} for user with id: {}", questions.size(), skillId, userId);
         return mapper.toDto(questions);
     }

@@ -173,7 +173,7 @@ class UserQuestionServiceTest {
         Long userId = 1L;
         String skillId = "123456789123456789123456";
         List<UserQuestionDocument> questions = List.of(userQuestionDocument);
-        when(userQuestionRepository.findAllByUserIdAndSkill_Id(userId, new ObjectId(skillId))).thenReturn(questions);
+        when(userQuestionRepository.findAllByUserIdAndSkillId(userId, new ObjectId(skillId))).thenReturn(questions);
         when(userQuestionMapper.toDto(questions)).thenReturn(List.of(userQuestionDto));
 
         List<UserQuestionDto> result = underTest.getUserQuestionsBySkillId(userId, skillId);
@@ -181,7 +181,7 @@ class UserQuestionServiceTest {
         assertNotNull(result);
         assertEquals(1, result.size());
         matchQuestionFields(userQuestionDto, result.getFirst());
-        verify(userQuestionRepository).findAllByUserIdAndSkill_Id(userId, new ObjectId(skillId));
+        verify(userQuestionRepository).findAllByUserIdAndSkillId(userId, new ObjectId(skillId));
     }
 
     private void matchQuestionFields(UserQuestionDto expected, UserQuestionDto actual) {
