@@ -42,44 +42,31 @@ class UserQuestionServiceTest {
     private UserQuestionDocument userQuestionDocument;
     private UserQuestionDto userQuestionDto;
     private SkillDocument skillDocument;
-    private SkillDto skillDto;
 
     @BeforeEach
     void setUp() {
-        ObjectId skillId = new ObjectId("123456789123456789123456");
-        skillDocument = new SkillDocument(skillId, "Java", null);
-        userQuestionDocument = createUserQuestionDocument(skillDocument);
-        skillDto = new SkillDto(skillId.toHexString(), "Java");
-        userQuestionDto = createUserQuestionDto(skillDto, skillId.toHexString());
-    }
+        skillDocument = new SkillDocument(new ObjectId("123456789123456789123456"), "Java", null);
 
-    private UserQuestionDocument createUserQuestionDocument(SkillDocument skillDocument) {
-        UserQuestionDocument document = new UserQuestionDocument();
-        document.setUserId(1L);
-        document.setText("abc");
-        document.setDifficulty(QuestionDifficulty.MEDIUM);
-        document.setType(QuestionType.HARD_SKILLS);
-        document.setSkill(skillDocument);
-        return document;
-    }
+        userQuestionDocument = new UserQuestionDocument();
+        userQuestionDocument.setUserId(1L);
+        userQuestionDocument.setText("abc");
+        userQuestionDocument.setDifficulty(QuestionDifficulty.MEDIUM);
+        userQuestionDocument.setType(QuestionType.HARD_SKILLS);
 
-    private UserQuestionDto createUserQuestionDto(SkillDto skillDto, String skillId) {
-        UserQuestionDto dto = new UserQuestionDto();
-        dto.setUserId(1L);
-        dto.setText("abc");
-        dto.setDifficulty(QuestionDifficulty.MEDIUM);
-        dto.setType(QuestionType.HARD_SKILLS);
-        dto.setSkill(skillDto);
-        dto.setSkillId(skillId);
-        return dto;
+        SkillDto skillDto = new SkillDto(skillDocument.getId().toHexString(), "Java");
+        userQuestionDto = new UserQuestionDto();
+        userQuestionDto.setUserId(1L);
+        userQuestionDto.setText("abc");
+        userQuestionDto.setDifficulty(QuestionDifficulty.MEDIUM);
+        userQuestionDto.setType(QuestionType.HARD_SKILLS);
+        userQuestionDto.setSkill(skillDto);
     }
 
     @Test
     void getUserQuestions_shouldReturnUserQuestionDto_whenQuestionsExist() {
         Long userId = 1L;
-        List<UserQuestionDocument> userQuestionDocuments = List.of(userQuestionDocument);
-        when(userQuestionRepository.findAllByUserId(userId)).thenReturn(userQuestionDocuments);
-        when(userQuestionMapper.toDto(userQuestionDocuments)).thenReturn(List.of(userQuestionDto));
+        when(userQuestionRepository.findAllByUserId(userId)).thenReturn(List.of(userQuestionDocument));
+        when(userQuestionMapper.toDto(List.of(userQuestionDocument))).thenReturn(List.of(userQuestionDto));
 
         List<UserQuestionDto> result = underTest.getUserQuestions(userId);
 
@@ -88,6 +75,7 @@ class UserQuestionServiceTest {
         matchQuestionFields(userQuestionDto, result.getFirst());
         verify(userQuestionRepository).findAllByUserId(userId);
     }
+
 
     @Test
     void createUserQuestion_shouldCreateAndReturnUserQuestionDto() {
@@ -119,6 +107,7 @@ class UserQuestionServiceTest {
         ObjectId objectId = new ObjectId(skillId);
         UserQuestionCreateDto questionDto = new UserQuestionCreateDto();
         questionDto.setSkillId(skillId);
+
         when(skillRepository.findById(objectId)).thenReturn(Optional.empty());
 
         assertThrows(NoSuchEntityException.class, () -> underTest.createUserQuestion(userId, questionDto));
@@ -129,19 +118,28 @@ class UserQuestionServiceTest {
     void updateUserQuestion_shouldThrowNoSuchEntityException_whenQuestionNotFound() {
         Long userId = 1L;
         String questionId = "123456789123456789123456";
-        UserQuestionUpdateDto questionDto = new UserQuestionUpdateDto();
-        when(userQuestionRepository.findByUserIdAndId(userId, new ObjectId(questionId))).thenReturn(Optional.empty());
+        UserQuestionUpdateDto updateDto = new UserQuestionUpdateDto();
 
-        assertThrows(NoSuchEntityException.class, () -> underTest.updateUserQuestion(userId, questionId, questionDto));
-        verify(userQuestionRepository).findByUserIdAndId(userId, new ObjectId(questionId));
+        when(userQuestionRepository.findByIdAndUserId(new ObjectId(questionId), userId)).thenReturn(Optional.empty());
+
+        assertThrows(NoSuchEntityException.class, () -> underTest.updateUserQuestion(userId, questionId, updateDto));
+        verify(userQuestionRepository).findByIdAndUserId(new ObjectId(questionId), userId);
     }
 
     @Test
     void updateUserQuestion_shouldUpdateAndReturnUserQuestionDto_whenQuestionExists() {
         Long userId = 1L;
         String questionId = "123456789123456789123456";
+        ObjectId skillId = new ObjectId("654321987654321987654321");
         UserQuestionUpdateDto updateDto = new UserQuestionUpdateDto();
-        when(userQuestionRepository.findByUserIdAndId(userId, new ObjectId(questionId))).thenReturn(Optional.of(userQuestionDocument));
+        updateDto.setSkillId(skillId.toString());
+        updateDto.setText("Updated text");
+        updateDto.setDifficulty(QuestionDifficulty.EASY);
+        updateDto.setType(QuestionType.SOFT_SKILLS);
+
+        when(userQuestionRepository.findByIdAndUserId(new ObjectId(questionId), userId)).thenReturn(Optional.of(userQuestionDocument));
+        when(skillRepository.findById(skillId)).thenReturn(Optional.of(skillDocument));
+        when(userQuestionMapper.updateDocument(userQuestionDocument, updateDto)).thenReturn(userQuestionDocument);
         when(userQuestionRepository.save(userQuestionDocument)).thenReturn(userQuestionDocument);
         when(userQuestionMapper.toDto(userQuestionDocument)).thenReturn(userQuestionDto);
 
@@ -149,7 +147,12 @@ class UserQuestionServiceTest {
 
         assertNotNull(result);
         matchQuestionFields(userQuestionDto, result);
-        verify(userQuestionRepository).findByUserIdAndId(userId, new ObjectId(questionId));
+        verify(userQuestionRepository).findByIdAndUserId(new ObjectId(questionId), userId);
+        verify(skillRepository).findById(skillId);
+        verify(userQuestionMapper).updateDocument(userQuestionDocument, updateDto);
+        verify(userQuestionRepository).findByIdAndUserId(new ObjectId(questionId), userId);
+        verify(skillRepository).findById(skillId);
+        verify(userQuestionMapper).updateDocument(userQuestionDocument, updateDto);
         verify(userQuestionRepository).save(userQuestionDocument);
         verify(userQuestionMapper).toDto(userQuestionDocument);
     }

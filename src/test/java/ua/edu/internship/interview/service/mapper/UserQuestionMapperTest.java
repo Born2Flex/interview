@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ua.edu.internship.interview.data.documents.SkillDocument;
 import ua.edu.internship.interview.data.documents.UserQuestionDocument;
 import ua.edu.internship.interview.data.enumeration.QuestionDifficulty;
 import ua.edu.internship.interview.data.enumeration.QuestionType;
@@ -24,85 +25,108 @@ class UserQuestionMapperTest {
     @Mock
     private SkillMapper skillMapper;
     @InjectMocks
-    private UserQuestionMapperImpl underTest;
+    private UserQuestionMapper underTest = new UserQuestionMapperImpl();
 
     @Test
     void toDto_shouldMapUserQuestionDocumentToUserQuestionDto() {
-        UserQuestionDocument userQuestionDocument = new UserQuestionDocument();
-        ObjectId id = new ObjectId("123456789123456789123456");
-        userQuestionDocument.setId(id);
-        userQuestionDocument.setUserId(1L);
-        userQuestionDocument.setText("Sample question text");
-        userQuestionDocument.setDifficulty(QuestionDifficulty.HARD);
-        userQuestionDocument.setType(QuestionType.SOFT_SKILLS);
-        when(baseMapper.map(id)).thenReturn("123456789123456789123456");
+        UserQuestionDocument questionDocument = createUserQuestionDocument();
+        ObjectId skillId = questionDocument.getSkill().getId();
+        ObjectId questionId = questionDocument.getId();
+        when(baseMapper.map(skillId)).thenReturn(skillId.toString());
+        when(baseMapper.map(questionId)).thenReturn(questionId.toString());
 
-        UserQuestionDto result = underTest.toDto(userQuestionDocument);
+        UserQuestionDto result = underTest.toDto(questionDocument);
 
         assertNotNull(result);
-        assertEquals(userQuestionDocument.getId(), new ObjectId(result.getId()));
-        assertEquals(userQuestionDocument.getUserId(), result.getUserId());
-        assertEquals(userQuestionDocument.getText(), result.getText());
-        assertEquals(userQuestionDocument.getDifficulty(), result.getDifficulty());
-        assertEquals(userQuestionDocument.getType(), result.getType());
+        matchUserQuestionDocumentToDto(questionDocument, result);
     }
 
     @Test
     void toDto_shouldMapListOfUserQuestionDocumentsToListOfUserQuestionDtos() {
-        UserQuestionDocument userQuestionDocument = new UserQuestionDocument();
-        userQuestionDocument.setId(new ObjectId("123456789123456789123456"));
-        userQuestionDocument.setUserId(1L);
-        userQuestionDocument.setText("Sample question text");
-        userQuestionDocument.setDifficulty(QuestionDifficulty.HARD);
-        userQuestionDocument.setType(QuestionType.SOFT_SKILLS);
-        List<UserQuestionDocument> documents = List.of(userQuestionDocument);
+        UserQuestionDocument questionDocument = createUserQuestionDocument();
+        ObjectId skillId = questionDocument.getSkill().getId();
+        ObjectId questionId = questionDocument.getId();
+        when(baseMapper.map(skillId)).thenReturn(skillId.toString());
+        when(baseMapper.map(questionId)).thenReturn(questionId.toString());
+        List<UserQuestionDocument> documents = List.of(questionDocument);
 
         List<UserQuestionDto> result = underTest.toDto(documents);
 
         assertNotNull(result);
         assertEquals(1, result.size());
-        UserQuestionDto resultDto = result.getFirst();
-        assertEquals(userQuestionDocument.getUserId(), resultDto.getUserId());
-        assertEquals(userQuestionDocument.getText(), resultDto.getText());
-        assertEquals(userQuestionDocument.getDifficulty(), resultDto.getDifficulty());
-        assertEquals(userQuestionDocument.getType(), resultDto.getType());
+        matchUserQuestionDocumentToDto(questionDocument, result.getFirst());
     }
 
     @Test
     void toDocument_shouldMapUserQuestionCreateDtoToUserQuestionDocument() {
-        UserQuestionCreateDto userQuestionCreateDto = new UserQuestionCreateDto();
-        userQuestionCreateDto.setText("Sample create question text");
-        userQuestionCreateDto.setSkillId("654321987654321987654321");
-        userQuestionCreateDto.setDifficulty(QuestionDifficulty.MEDIUM);
-        userQuestionCreateDto.setType(QuestionType.HARD_SKILLS);
+        long userId = 1L;
+        UserQuestionCreateDto userQuestionCreateDto = createUserQuestionCreateDto();
 
-        UserQuestionDocument result = underTest.toDocument(1L, userQuestionCreateDto);
+        UserQuestionDocument result = underTest.toDocument(userId, userQuestionCreateDto);
 
         assertNotNull(result);
-        assertEquals(1L, result.getUserId());
-        assertEquals(userQuestionCreateDto.getText(), result.getText());
-        assertEquals(userQuestionCreateDto.getDifficulty(), result.getDifficulty());
-        assertEquals(userQuestionCreateDto.getType(), result.getType());
+        matchUserQuestionCreateDtoToDocument(userId, userQuestionCreateDto, result);
     }
 
     @Test
     void updateDocument_shouldUpdateUserQuestionDocumentWithUserQuestionUpdateDto() {
+        UserQuestionUpdateDto userQuestionUpdateDto = createUserQuestionUpdateDto();
+        UserQuestionDocument userQuestionDocument = createUserQuestionDocument();
+
+        underTest.updateDocument(userQuestionDocument, userQuestionUpdateDto);
+
+        assertNotNull(userQuestionDocument);
+        matchUserQuestionUpdateDtoToDocument(userQuestionUpdateDto, userQuestionDocument);
+    }
+
+    private UserQuestionDocument createUserQuestionDocument() {
+        UserQuestionDocument questionDocument = new UserQuestionDocument();
+        questionDocument.setId(new ObjectId("123456789123456789123456"));
+        questionDocument.setUserId(1L);
+        questionDocument.setText("Sample question text");
+        questionDocument.setDifficulty(QuestionDifficulty.HARD);
+        questionDocument.setType(QuestionType.SOFT_SKILLS);
+        ObjectId skillId = new ObjectId("654321987654321987654321");
+        SkillDocument skillDocument = new SkillDocument(skillId, "Programming", null);
+        questionDocument.setSkill(skillDocument);
+        return questionDocument;
+    }
+
+    private UserQuestionCreateDto createUserQuestionCreateDto() {
+        UserQuestionCreateDto userQuestionCreateDto = new UserQuestionCreateDto();
+        userQuestionCreateDto.setText("Complexity of merge sort algorithm?");
+        userQuestionCreateDto.setSkillId("654321987654321987654321");
+        userQuestionCreateDto.setDifficulty(QuestionDifficulty.MEDIUM);
+        userQuestionCreateDto.setType(QuestionType.HARD_SKILLS);
+        return userQuestionCreateDto;
+    }
+
+    private UserQuestionUpdateDto createUserQuestionUpdateDto() {
         UserQuestionUpdateDto userQuestionUpdateDto = new UserQuestionUpdateDto();
         userQuestionUpdateDto.setText("Updated question text");
         userQuestionUpdateDto.setDifficulty(QuestionDifficulty.EASY);
         userQuestionUpdateDto.setType(QuestionType.SOFT_SKILLS);
+        return userQuestionUpdateDto;
+    }
 
-        UserQuestionDocument userQuestionDocument = new UserQuestionDocument();
-        userQuestionDocument.setId(new ObjectId("123456789123456789123456"));
-        userQuestionDocument.setText("Sample question text");
-        userQuestionDocument.setDifficulty(QuestionDifficulty.HARD);
-        userQuestionDocument.setType(QuestionType.SOFT_SKILLS);
+    private void matchUserQuestionDocumentToDto(UserQuestionDocument document, UserQuestionDto dto) {
+        assertEquals(document.getId().toString(), dto.getId());
+        assertEquals(document.getUserId(), dto.getUserId());
+        assertEquals(document.getText(), dto.getText());
+        assertEquals(document.getDifficulty(), dto.getDifficulty());
+        assertEquals(document.getType(), dto.getType());
+    }
 
-        underTest.updateDocument(userQuestionUpdateDto, userQuestionDocument);
+    private void matchUserQuestionCreateDtoToDocument(Long userId, UserQuestionCreateDto createDto, UserQuestionDocument document) {
+        assertEquals(userId, document.getUserId());
+        assertEquals(createDto.getText(), document.getText());
+        assertEquals(createDto.getDifficulty(), document.getDifficulty());
+        assertEquals(createDto.getType(), document.getType());
+    }
 
-        assertNotNull(userQuestionDocument);
-        assertEquals(userQuestionUpdateDto.getText(), userQuestionDocument.getText());
-        assertEquals(userQuestionUpdateDto.getDifficulty(), userQuestionDocument.getDifficulty());
-        assertEquals(userQuestionUpdateDto.getType(), userQuestionDocument.getType());
+    private void matchUserQuestionUpdateDtoToDocument(UserQuestionUpdateDto updateDto, UserQuestionDocument document) {
+        assertEquals(updateDto.getText(), document.getText());
+        assertEquals(updateDto.getDifficulty(), document.getDifficulty());
+        assertEquals(updateDto.getType(), document.getType());
     }
 }

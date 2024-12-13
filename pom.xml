@@ -114,7 +114,7 @@
                 <version>${jacoco-maven-plugin.version}</version>
                 <configuration>
                     <includes>
-                        <include>ua/edu/internship/interview/service/business/**</include>
+                        <include>ua/edu/internship/interview/service/**</include>
                     </includes>
                 </configuration>
                 <executions>

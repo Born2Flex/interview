@@ -31,19 +31,21 @@ public class UserQuestionService {
 
     public UserQuestionDto createUserQuestion(Long userId, UserQuestionCreateDto dto) {
         log.info("Attempting to create new question for user with id: {}", userId);
-        UserQuestionDocument questionDocument = mapper.toDocument(userId, dto);
         SkillDocument skill = getSkillByIdOrElseThrow(dto.getSkillId());
+        UserQuestionDocument questionDocument = mapper.toDocument(userId, dto);
         questionDocument.setSkill(skill);
         UserQuestionDocument savedQuestion = userQuestionRepository.save(questionDocument);
         log.info("Created new question with id: {} for user with id: {}", savedQuestion.getId(), userId);
         return mapper.toDto(savedQuestion);
     }
 
-    public UserQuestionDto updateUserQuestion(Long userId, String questionId, UserQuestionUpdateDto dto) {
+    public UserQuestionDto updateUserQuestion(Long userId, String questionId, UserQuestionUpdateDto updateDto) {
         log.info("Attempting to update question with id: {} for user with id: {}", questionId, userId);
         UserQuestionDocument questionDocument = getQuestionByUserIdOrElseThrow(userId, questionId);
-        mapper.updateDocument(dto, questionDocument);
-        UserQuestionDocument updatedQuestion = userQuestionRepository.save(questionDocument);
+        SkillDocument skillDocument = getSkillByIdOrElseThrow(updateDto.getSkillId());
+        UserQuestionDocument updatedQuestionDocument = mapper.updateDocument(questionDocument, updateDto);
+        updatedQuestionDocument.setSkill(skillDocument);
+        UserQuestionDocument updatedQuestion = userQuestionRepository.save(updatedQuestionDocument);
         log.info("Updated question with id: {} for user with id: {}", updatedQuestion.getId(), userId);
         return mapper.toDto(updatedQuestion);
     }
@@ -62,11 +64,14 @@ public class UserQuestionService {
     }
 
     private SkillDocument getSkillByIdOrElseThrow(String skillId) {
-        return skillRepository.findById(new ObjectId(skillId)).orElseThrow(() -> new NoSuchEntityException("Skill not found"));
+        return skillRepository.findById(new ObjectId(skillId))
+                .orElseThrow(() -> new NoSuchEntityException("Skill not found by id: " + skillId));
     }
 
     private UserQuestionDocument getQuestionByUserIdOrElseThrow(Long userId, String questionId) {
-        return userQuestionRepository.findByUserIdAndId(userId, new ObjectId(questionId))
-                .orElseThrow(() -> new NoSuchEntityException("Question not found"));
+        return userQuestionRepository.findByIdAndUserId(new ObjectId(questionId), userId)
+                .orElseThrow(() -> new NoSuchEntityException(
+                        "Question not found by id: " + questionId + " for user with id: " + userId
+                ));
     }
 }

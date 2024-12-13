@@ -32,7 +32,7 @@ public class UserSkillsService {
         log.info("Attempting to create skills document for user with id: {}", userId);
         validateUserSkillsNotExists(userId);
         List<SkillDocument> skills = getSkillsByIds(skillIds);
-        UserSkillsDocument userSkillsDocument = UserSkillsDocument.builder().userId(userId).skills(skills).build();
+        UserSkillsDocument userSkillsDocument = createUserSkillsDocument(userId, skills);
         UserSkillsDocument savedUserSkills = userSkillRepository.save(userSkillsDocument);
         log.info("Created skills document with id: {}, for user with id: {}", savedUserSkills.getId(), userId);
         return mapper.toDto(savedUserSkills);
@@ -46,6 +46,13 @@ public class UserSkillsService {
         UserSkillsDocument updatedUserSkills = userSkillRepository.save(userSkillsDocument);
         log.info("Updated skills for user with id: {}", userId);
         return mapper.toDto(updatedUserSkills);
+    }
+
+    private UserSkillsDocument createUserSkillsDocument(Long userId, List<SkillDocument> skills) {
+        return UserSkillsDocument.builder()
+                .userId(userId)
+                .skills(skills)
+                .build();
     }
 
     private void validateUserSkillsNotExists(Long userId) {
@@ -66,6 +73,6 @@ public class UserSkillsService {
 
     private UserSkillsDocument getSkillsByUserIdOrElseThrow(Long userId) {
         return userSkillRepository.findByUserId(userId)
-                .orElseThrow(() -> new NoSuchEntityException("User skills not found"));
+                .orElseThrow(() -> new NoSuchEntityException("User skills not found by user id: " + userId));
     }
 }

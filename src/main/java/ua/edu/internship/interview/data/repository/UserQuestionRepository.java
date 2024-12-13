@@ -11,7 +11,7 @@ public interface UserQuestionRepository extends MongoRepository<UserQuestionDocu
 
     List<UserQuestionDocument> findAllByUserIdAndSkill_Id(Long userId, ObjectId skillId);
 
-    Optional<UserQuestionDocument> findByUserIdAndId(Long userId, ObjectId id);
+    Optional<UserQuestionDocument> findByIdAndUserId(ObjectId id, Long userId);
 
     void deleteByUserIdAndSkill_Id(Long userId, ObjectId skillId);
 }

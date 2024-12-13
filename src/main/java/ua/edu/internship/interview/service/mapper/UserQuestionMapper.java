@@ -12,6 +12,7 @@ import java.util.List;
 
 @Mapper(componentModel = SPRING, uses = {SkillMapper.class, BaseMapper.class})
 public interface UserQuestionMapper {
+    @Mapping(target = "skillId", source = "skill.id")
     UserQuestionDto toDto(UserQuestionDocument document);
 
     List<UserQuestionDto> toDto(List<UserQuestionDocument> documents);
@@ -19,5 +20,5 @@ public interface UserQuestionMapper {
     @Mapping(target = "userId", source = "userId")
     UserQuestionDocument toDocument(Long userId, UserQuestionCreateDto dto);
 
-    void updateDocument(UserQuestionUpdateDto dto, @MappingTarget UserQuestionDocument entity);
+    UserQuestionDocument updateDocument(@MappingTarget UserQuestionDocument document, UserQuestionUpdateDto dto);
 }
