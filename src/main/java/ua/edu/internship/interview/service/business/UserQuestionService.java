@@ -8,6 +8,7 @@ import ua.edu.internship.interview.data.documents.SkillDocument;
 import ua.edu.internship.interview.data.documents.UserQuestionDocument;
 import ua.edu.internship.interview.data.repository.SkillRepository;
 import ua.edu.internship.interview.data.repository.UserQuestionRepository;
+import ua.edu.internship.interview.service.client.UserServiceClient;
 import ua.edu.internship.interview.service.dto.user.question.UserQuestionCreateDto;
 import ua.edu.internship.interview.service.dto.user.question.UserQuestionDto;
 import ua.edu.internship.interview.service.dto.user.question.UserQuestionUpdateDto;
@@ -22,6 +23,7 @@ public class UserQuestionService {
     private final UserQuestionRepository userQuestionRepository;
     private final SkillRepository skillRepository;
     private final UserQuestionMapper mapper;
+    private final UserServiceClient userClient;
 
     public List<UserQuestionDto> getUserQuestions(Long userId) {
         List<UserQuestionDocument> questions = userQuestionRepository.findAllByUserId(userId);
@@ -31,6 +33,7 @@ public class UserQuestionService {
 
     public UserQuestionDto createUserQuestion(Long userId, UserQuestionCreateDto dto) {
         log.info("Attempting to create new question for user with id: {}", userId);
+        validateUserExistsById(userId);
         SkillDocument skill = getSkillByIdOrElseThrow(dto.getSkillId());
         UserQuestionDocument questionDocument = mapper.toDocument(userId, dto);
         questionDocument.setSkill(skill);
@@ -41,6 +44,7 @@ public class UserQuestionService {
 
     public UserQuestionDto updateUserQuestion(Long userId, String questionId, UserQuestionUpdateDto updateDto) {
         log.info("Attempting to update question with id: {} for user with id: {}", questionId, userId);
+        validateUserExistsById(userId);
         UserQuestionDocument questionDocument = getQuestionByUserIdOrElseThrow(userId, questionId);
         SkillDocument skillDocument = getSkillByIdOrElseThrow(updateDto.getSkillId());
         UserQuestionDocument updatedQuestionDocument = mapper.updateDocument(questionDocument, updateDto);
@@ -52,6 +56,7 @@ public class UserQuestionService {
 
     public void deleteUserQuestion(Long userId, String questionId) {
         log.info("Attempting to delete question with id: {}, for user with id: {}", questionId, userId);
+        validateUserExistsById(userId);
         userQuestionRepository.deleteByUserIdAndSkill_Id(userId, new ObjectId(questionId));
         log.info("Question with id: {} deleted successfully, for user with id: {}", questionId, userId);
     }
@@ -73,5 +78,9 @@ public class UserQuestionService {
                 .orElseThrow(() -> new NoSuchEntityException(
                         "Question not found by id: " + questionId + " for user with id: " + userId
                 ));
+    }
+
+    private void validateUserExistsById(Long userId) {
+        userClient.getById(userId).orElseThrow(() -> new NoSuchEntityException("User not found by id: " + userId));
     }
 }

@@ -16,14 +16,13 @@ import ua.edu.internship.interview.data.enumeration.QuestionType;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode
 @Getter
 @Setter
 @Builder
 @Document(collection = "user_questions")
 public class UserQuestionDocument {
     @Id
-    @EqualsAndHashCode.Include
     @Field(name = "id")
     private ObjectId id;
     @Field(name = "userId")

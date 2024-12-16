@@ -15,14 +15,13 @@ import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode
 @Getter
 @Setter
 @Builder
 @Document(collection = "user_skills")
 public class UserSkillsDocument {
     @Id
-    @EqualsAndHashCode.Include
     @Field(name = "id")
     private ObjectId id;
     @Field(name = "userId")

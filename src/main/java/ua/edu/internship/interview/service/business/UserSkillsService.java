@@ -8,6 +8,7 @@ import ua.edu.internship.interview.data.documents.SkillDocument;
 import ua.edu.internship.interview.data.documents.UserSkillsDocument;
 import ua.edu.internship.interview.data.repository.SkillRepository;
 import ua.edu.internship.interview.data.repository.UserSkillRepository;
+import ua.edu.internship.interview.service.client.UserServiceClient;
 import ua.edu.internship.interview.service.dto.user.skill.UserSkillsDto;
 import ua.edu.internship.interview.service.mapper.UserSkillsMapper;
 import ua.edu.internship.interview.service.utils.exceptions.InvalidInputException;
@@ -21,6 +22,7 @@ public class UserSkillsService {
     private final UserSkillRepository userSkillRepository;
     private final SkillRepository skillRepository;
     private final UserSkillsMapper mapper;
+    private final UserServiceClient userClient;
 
     public UserSkillsDto getUserSkills(Long userId) {
         UserSkillsDocument userSkillsDocument = getSkillsByUserIdOrElseThrow(userId);
@@ -30,6 +32,7 @@ public class UserSkillsService {
 
     public UserSkillsDto createUserSkills(Long userId, List<String> skillIds) {
         log.info("Attempting to create skills document for user with id: {}", userId);
+        validateUserExistsById(userId);
         validateUserSkillsNotExists(userId);
         List<SkillDocument> skills = getSkillsByIds(skillIds);
         UserSkillsDocument userSkillsDocument = createUserSkillsDocument(userId, skills);
@@ -40,6 +43,7 @@ public class UserSkillsService {
 
     public UserSkillsDto updateUserSkills(Long userId, List<String> skillIds) {
         log.info("Attempting to update skills for user with id: {}", userId);
+        validateUserExistsById(userId);
         UserSkillsDocument userSkillsDocument = getSkillsByUserIdOrElseThrow(userId);
         List<SkillDocument> skills = getSkillsByIds(skillIds);
         userSkillsDocument.setSkills(skills);
@@ -74,5 +78,9 @@ public class UserSkillsService {
     private UserSkillsDocument getSkillsByUserIdOrElseThrow(Long userId) {
         return userSkillRepository.findByUserId(userId)
                 .orElseThrow(() -> new NoSuchEntityException("User skills not found by user id: " + userId));
+    }
+
+    private void validateUserExistsById(Long userId) {
+        userClient.getById(userId).orElseThrow(() -> new NoSuchEntityException("User not found by id: " + userId));
     }
 }
