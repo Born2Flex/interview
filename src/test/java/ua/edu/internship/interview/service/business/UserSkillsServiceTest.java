@@ -11,7 +11,9 @@ import ua.edu.internship.interview.data.documents.SkillDocument;
 import ua.edu.internship.interview.data.documents.UserSkillsDocument;
 import ua.edu.internship.interview.data.repository.SkillRepository;
 import ua.edu.internship.interview.data.repository.UserSkillRepository;
+import ua.edu.internship.interview.service.client.UserServiceClient;
 import ua.edu.internship.interview.service.dto.skill.SkillDto;
+import ua.edu.internship.interview.service.dto.user.UserDto;
 import ua.edu.internship.interview.service.dto.user.skill.UserSkillsDto;
 import ua.edu.internship.interview.service.mapper.UserSkillsMapper;
 import ua.edu.internship.interview.service.utils.exceptions.InvalidInputException;
@@ -34,6 +36,8 @@ class UserSkillsServiceTest {
     private SkillRepository skillRepository;
     @Mock
     private UserSkillsMapper userSkillsMapper;
+    @Mock
+    private UserServiceClient userClient;
     @InjectMocks
     private UserSkillsService underTest;
 
@@ -48,14 +52,8 @@ class UserSkillsServiceTest {
                 buildSkillDoc("123456789123456789123452", "Kotlin"));
         skillDTOs = List.of(buildSkillDto("123456789123456789123451", "Java"),
                 buildSkillDto("123456789123456789123452", "Kotlin"));
-
-        userSkillsDocument = new UserSkillsDocument();
-        userSkillsDocument.setUserId(1L);
-        userSkillsDocument.setSkills(skillDocuments);
-
-        userSkillsDto = new UserSkillsDto();
-        userSkillsDto.setUserId(1L);
-        userSkillsDto.setSkills(skillDTOs);
+        userSkillsDocument = UserSkillsDocument.builder().userId(1L).skills(skillDocuments).build();
+        userSkillsDto = UserSkillsDto.builder().userId(1L).skills(skillDTOs).build();
     }
 
     @Test
@@ -89,10 +87,12 @@ class UserSkillsServiceTest {
         String skillId1 = "123456789123456789123451";
         String skillId2 = "123456789123456789123452";
         List<ObjectId> skillObjectIds = List.of(new ObjectId(skillId1), new ObjectId(skillId2));
+        UserSkillsDocument createdDocument = UserSkillsDocument.builder().userId(userId).skills(skillDocuments).build();
 
+        when(userClient.getById(userId)).thenReturn(Optional.of(new UserDto()));
         when(userSkillRepository.findByUserId(userId)).thenReturn(Optional.empty());
         when(skillRepository.findAllById(skillObjectIds)).thenReturn(skillDocuments);
-        when(userSkillRepository.save(any(UserSkillsDocument.class))).thenReturn(userSkillsDocument);
+        when(userSkillRepository.save(createdDocument)).thenReturn(userSkillsDocument);
         when(userSkillsMapper.toDto(userSkillsDocument)).thenReturn(userSkillsDto);
 
         UserSkillsDto result = underTest.createUserSkills(userId, List.of(skillId1, skillId2));
@@ -102,16 +102,22 @@ class UserSkillsServiceTest {
         assertEquals(skillObjectIds.size(), result.getSkills().size());
         matchSkillFields(skillDTOs.getFirst(), result.getSkills().getFirst());
         matchSkillFields(skillDTOs.getLast(), result.getSkills().getLast());
-        verify(userSkillRepository).save(userSkillsDocument);
+        verify(userClient).getById(userId);
+        verify(userSkillRepository).save(any(UserSkillsDocument.class));
+        verify(skillRepository).findAllById(skillObjectIds);
+        verify(userSkillsMapper).toDto(userSkillsDocument);
     }
 
     @Test
     void createUserSkills_shouldThrowInvalidInputException_whenUserSkillsExist() {
         Long userId = 1L;
         List<String> list = Collections.emptyList();
+
+        when(userClient.getById(userId)).thenReturn(Optional.of(new UserDto()));
         when(userSkillRepository.findByUserId(userId)).thenReturn(Optional.of(userSkillsDocument));
 
         assertThrows(InvalidInputException.class, () -> underTest.createUserSkills(userId, list));
+        verify(userClient).getById(userId);
         verify(userSkillRepository).findByUserId(userId);
     }
 
@@ -127,11 +133,17 @@ class UserSkillsServiceTest {
         skillDTOs = List.of(buildSkillDto("123456789123456789123451", "Java"),
                 buildSkillDto("123456789123456789123453", "Kotlin"));
         userSkillsDto.setSkills(skillDTOs);
+        UserSkillsDocument updatedDocument = UserSkillsDocument.builder()
+                .id(userSkillsDocument.getId())
+                .userId(userId)
+                .skills(skillDocuments)
+                .build();
 
+        when(userClient.getById(userId)).thenReturn(Optional.of(new UserDto()));
         when(userSkillRepository.findByUserId(userId)).thenReturn(Optional.of(userSkillsDocument));
         when(skillRepository.findAllById(skillObjectIds)).thenReturn(skillDocuments);
-        when(userSkillRepository.save(userSkillsDocument)).thenReturn(userSkillsDocument);
-        when(userSkillsMapper.toDto(userSkillsDocument)).thenReturn(userSkillsDto);
+        when(userSkillRepository.save(updatedDocument)).thenReturn(updatedDocument);
+        when(userSkillsMapper.toDto(updatedDocument)).thenReturn(userSkillsDto);
 
         UserSkillsDto result = underTest.updateUserSkills(userId, skillIds);
 
@@ -140,13 +152,18 @@ class UserSkillsServiceTest {
         assertEquals(2, result.getSkills().size());
         matchSkillFields(skillDTOs.getFirst(), result.getSkills().getFirst());
         matchSkillFields(skillDTOs.getLast(), result.getSkills().getLast());
+        verify(userClient).getById(userId);
+        verify(userSkillRepository).findByUserId(userId);
+        verify(skillRepository).findAllById(skillObjectIds);
         verify(userSkillRepository).save(userSkillsDocument);
+        verify(userSkillsMapper).toDto(userSkillsDocument);
     }
 
     @Test
     void updateUserSkills_shouldThrowNoSuchEntityException_whenUserSkillsNotFound() {
         Long userId = 1L;
         List<String> emptyList = Collections.emptyList();
+        when(userClient.getById(userId)).thenReturn(Optional.of(new UserDto()));
         when(userSkillRepository.findByUserId(userId)).thenReturn(Optional.empty());
 
         assertThrows(NoSuchEntityException.class, () -> underTest.updateUserSkills(userId, emptyList));
@@ -159,6 +176,7 @@ class UserSkillsServiceTest {
         String skillId = "123456789123456789123456";
         ObjectId skillObjectId = new ObjectId(skillId);
         List<String> invalidSkillIds = List.of(skillId);
+        when(userClient.getById(userId)).thenReturn(Optional.of(new UserDto()));
         when(skillRepository.findAllById(List.of(skillObjectId))).thenReturn(List.of());
 
         assertThrows(InvalidInputException.class, () -> underTest.createUserSkills(userId, invalidSkillIds));
@@ -171,12 +189,35 @@ class UserSkillsServiceTest {
         String skillId = "123456789123456789123456";
         ObjectId skillObjectId = new ObjectId(skillId);
         List<String> invalidSkillIds = List.of(skillId);
+        when(userClient.getById(userId)).thenReturn(Optional.of(new UserDto()));
         when(userSkillRepository.findByUserId(userId)).thenReturn(Optional.of(userSkillsDocument));
         when(skillRepository.findAllById(List.of(skillObjectId))).thenReturn(List.of());
 
         assertThrows(InvalidInputException.class, () -> underTest.updateUserSkills(userId, invalidSkillIds));
         verify(userSkillRepository).findByUserId(userId);
         verify(skillRepository).findAllById(List.of(skillObjectId));
+    }
+
+    @Test
+    void createUserSkills_shouldThrowNoSuchEntityException_whenUserNotFound() {
+        Long userId = 1L;
+        List<String> skillIds = List.of("123456789123456789123456");
+        when(userClient.getById(userId)).thenReturn(Optional.empty());
+
+        assertThrows(NoSuchEntityException.class, () -> underTest.createUserSkills(userId, skillIds));
+
+        verify(userClient).getById(userId);
+    }
+
+    @Test
+    void updateUserSkills_shouldThrowNoSuchEntityException_whenUserNotFound() {
+        Long userId = 1L;
+        List<String> skillIds = List.of("123456789123456789123456");
+        when(userClient.getById(userId)).thenReturn(Optional.empty());
+
+        assertThrows(NoSuchEntityException.class, () -> underTest.updateUserSkills(userId, skillIds));
+
+        verify(userClient).getById(userId);
     }
 
     private void matchSkillFields(SkillDto expected, SkillDto actual) {
