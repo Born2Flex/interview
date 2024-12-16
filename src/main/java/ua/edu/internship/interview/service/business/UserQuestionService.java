@@ -9,6 +9,7 @@ import ua.edu.internship.interview.data.documents.UserQuestionDocument;
 import ua.edu.internship.interview.data.repository.SkillRepository;
 import ua.edu.internship.interview.data.repository.UserQuestionRepository;
 import ua.edu.internship.interview.service.client.UserServiceClient;
+import ua.edu.internship.interview.service.dto.user.UserDto;
 import ua.edu.internship.interview.service.dto.user.question.UserQuestionCreateDto;
 import ua.edu.internship.interview.service.dto.user.question.UserQuestionDto;
 import ua.edu.internship.interview.service.dto.user.question.UserQuestionUpdateDto;
