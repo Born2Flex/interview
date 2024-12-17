@@ -45,7 +45,6 @@ public class UserQuestionService {
 
     public UserQuestionDto updateUserQuestion(Long userId, String questionId, UserQuestionUpdateDto updateDto) {
         log.info("Attempting to update question with id: {} for user with id: {}", questionId, userId);
-        validateUserExistsById(userId);
         UserQuestionDocument questionDocument = getQuestionByUserIdOrElseThrow(userId, questionId);
         SkillDocument skillDocument = getSkillByIdOrElseThrow(updateDto.getSkillId());
         UserQuestionDocument updatedQuestionDocument = mapper.updateDocument(questionDocument, updateDto);
@@ -57,7 +56,6 @@ public class UserQuestionService {
 
     public void deleteUserQuestion(Long userId, String questionId) {
         log.info("Attempting to delete question with id: {}, for user with id: {}", questionId, userId);
-        validateUserExistsById(userId);
         userQuestionRepository.deleteByUserIdAndSkill_Id(userId, new ObjectId(questionId));
         log.info("Question with id: {} deleted successfully, for user with id: {}", questionId, userId);
     }

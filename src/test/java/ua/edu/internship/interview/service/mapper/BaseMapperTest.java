@@ -13,7 +13,7 @@ class BaseMapperTest {
     public void setUp() {
         underTest = new BaseMapper();
     }
-
+//TODO Unify tests names
     @Test
     void testMap() {
         ObjectId objectId = new ObjectId();
