@@ -43,7 +43,6 @@ public class UserSkillsService {
 
     public UserSkillsDto updateUserSkills(Long userId, List<String> skillIds) {
         log.info("Attempting to update skills for user with id: {}", userId);
-        validateUserExistsById(userId);
         UserSkillsDocument userSkillsDocument = getSkillsByUserIdOrElseThrow(userId);
         List<SkillDocument> skills = getSkillsByIds(skillIds);
         userSkillsDocument.setSkills(skills);
@@ -81,6 +80,8 @@ public class UserSkillsService {
     }
 
     private void validateUserExistsById(Long userId) {
-        userClient.getById(userId).orElseThrow(() -> new NoSuchEntityException("User not found by id: " + userId));
+        if (!userClient.existsById(userId)) {
+            throw new NoSuchEntityException("User not found by id: " + userId);
+        }
     }
 }

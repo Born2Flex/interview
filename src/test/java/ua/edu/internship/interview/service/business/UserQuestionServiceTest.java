@@ -2,6 +2,7 @@ package ua.edu.internship.interview.service.business;
 
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -15,7 +16,6 @@ import ua.edu.internship.interview.data.repository.SkillRepository;
 import ua.edu.internship.interview.data.repository.UserQuestionRepository;
 import ua.edu.internship.interview.service.client.UserServiceClient;
 import ua.edu.internship.interview.service.dto.skill.SkillDto;
-import ua.edu.internship.interview.service.dto.user.UserDto;
 import ua.edu.internship.interview.service.dto.user.question.UserQuestionCreateDto;
 import ua.edu.internship.interview.service.dto.user.question.UserQuestionDto;
 import ua.edu.internship.interview.service.dto.user.question.UserQuestionUpdateDto;
@@ -71,41 +71,58 @@ class UserQuestionServiceTest {
     }
 
     @Test
-    void getUserQuestions_shouldReturnUserQuestionDto_whenQuestionsExist() {
+    @DisplayName("Should return not empty list of user questions when questions exists for specified user")
+    void shouldReturnUserQuestionsWhenSuchExists() {
+        // given
         Long userId = 1L;
         when(userQuestionRepository.findAllByUserId(userId)).thenReturn(List.of(userQuestionDocument));
         when(userQuestionMapper.toDto(List.of(userQuestionDocument))).thenReturn(List.of(userQuestionDto));
 
+        // when
         List<UserQuestionDto> result = underTest.getUserQuestions(userId);
 
+        // then
         assertNotNull(result);
         assertEquals(1, result.size());
-        matchQuestionFields(userQuestionDto, result.getFirst());
         verify(userQuestionRepository).findAllByUserId(userId);
     }
 
+    @Test
+    @DisplayName("Should return same user questions that is stored in DB for specified user")
+    void shouldReturnSameQuestionsThatIsStoredInDB() {
+        // given
+        Long userId = 1L;
+        when(userQuestionRepository.findAllByUserId(userId)).thenReturn(List.of(userQuestionDocument));
+        when(userQuestionMapper.toDto(List.of(userQuestionDocument))).thenReturn(List.of(userQuestionDto));
+
+        // when
+        List<UserQuestionDto> result = underTest.getUserQuestions(userId);
+
+        // then
+        assertNotNull(result);
+        matchQuestionFields(userQuestionDto, result.getFirst());
+    }
 
     @Test
-    void createUserQuestion_shouldCreateAndReturnUserQuestionDto() {
+    @DisplayName("Should create user question when specified user and skill exists")
+    void shouldCreateUserQuestion() {
+        // given
         Long userId = 1L;
         String skillId = "123456789123456789123456";
         ObjectId objectId = new ObjectId(skillId);
-        UserQuestionCreateDto createDto = UserQuestionCreateDto.builder()
-                .text("abc")
-                .skillId(skillId)
-                .difficulty(QuestionDifficulty.MEDIUM)
-                .type(QuestionType.HARD_SKILLS)
-                .build();
-        when(userClient.getById(userId)).thenReturn(Optional.of(new UserDto()));
+        UserQuestionCreateDto createDto = UserQuestionCreateDto.builder().text("abc").skillId(skillId)
+                .difficulty(QuestionDifficulty.MEDIUM).type(QuestionType.HARD_SKILLS).build();
+        when(userClient.existsById(userId)).thenReturn(true);
         when(skillRepository.findById(objectId)).thenReturn(Optional.of(skillDocument));
         when(userQuestionMapper.toDocument(userId, createDto)).thenReturn(userQuestionDocument);
         when(userQuestionRepository.save(userQuestionDocument)).thenReturn(userQuestionDocument);
         when(userQuestionMapper.toDto(userQuestionDocument)).thenReturn(userQuestionDto);
 
+        // when
         UserQuestionDto result = underTest.createUserQuestion(userId, createDto);
 
+        // then
         assertNotNull(result);
-        matchQuestionFields(userQuestionDto, result);
         verify(userQuestionRepository).save(userQuestionDocument);
         verify(skillRepository).findById(objectId);
         verify(userQuestionMapper).toDocument(userId, createDto);
@@ -114,36 +131,100 @@ class UserQuestionServiceTest {
     }
 
     @Test
-    void createUserQuestion_shouldThrowNoSuchEntityException_whenSkillNotFound() {
+    @DisplayName("Should create user question with the same data as in creation dto")
+    void shouldCreateUserQuestionWithSameDataAsInCreationDto() {
+        // given
+        Long userId = 1L;
+        String skillId = "123456789123456789123456";
+        ObjectId objectId = new ObjectId(skillId);
+        UserQuestionCreateDto createDto = UserQuestionCreateDto.builder().text("abc").skillId(skillId)
+                .difficulty(QuestionDifficulty.MEDIUM).type(QuestionType.HARD_SKILLS).build();
+        when(userClient.existsById(userId)).thenReturn(true);
+        when(skillRepository.findById(objectId)).thenReturn(Optional.of(skillDocument));
+        when(userQuestionMapper.toDocument(userId, createDto)).thenReturn(userQuestionDocument);
+        when(userQuestionRepository.save(userQuestionDocument)).thenReturn(userQuestionDocument);
+        when(userQuestionMapper.toDto(userQuestionDocument)).thenReturn(userQuestionDto);
+
+        // when
+        UserQuestionDto result = underTest.createUserQuestion(userId, createDto);
+
+        // then
+        assertNotNull(result);
+        matchQuestionFields(userQuestionDto, result);
+    }
+
+    @Test
+    @DisplayName("Should throw NoSuchEntityException when user for which the question is created not found")
+    void shouldThrowNoSuchEntityExceptionWhenUserNotFound() {
+        // given
+        Long userId = 1L;
+        UserQuestionCreateDto questionDto = new UserQuestionCreateDto();
+        when(userClient.existsById(userId)).thenReturn(false);
+
+        // when
+        // then
+        assertThrows(NoSuchEntityException.class, () -> underTest.createUserQuestion(userId, questionDto));
+        verify(userClient).existsById(userId);
+    }
+
+    @Test
+    @DisplayName("Should throw NoSuchEntityException when question skill not found when creating new question for user")
+    void shouldThrowNoSuchEntityExceptionWhenSkillNotFound() {
+        // given
         Long userId = 1L;
         String skillId = "123456789123456789123456";
         ObjectId objectId = new ObjectId(skillId);
         UserQuestionCreateDto questionDto = new UserQuestionCreateDto();
         questionDto.setSkillId(skillId);
-
-        when(userClient.getById(userId)).thenReturn(Optional.of(new UserDto()));
+        when(userClient.existsById(userId)).thenReturn(true);
         when(skillRepository.findById(objectId)).thenReturn(Optional.empty());
 
+        // when
+        // then
         assertThrows(NoSuchEntityException.class, () -> underTest.createUserQuestion(userId, questionDto));
         verify(skillRepository).findById(objectId);
     }
 
     @Test
-    void updateUserQuestion_shouldThrowNoSuchEntityException_whenQuestionNotFound() {
+    @DisplayName("Should throw NoSuchEntityException when question which is updated not found")
+    void shouldThrowNoSuchEntityExceptionWhenUpdatedQuestionNotFound() {
+        // given
         Long userId = 1L;
-        UserQuestionUpdateDto updateDto = new UserQuestionUpdateDto();
         String questionId = "123456789123456789123456";
+        String skillId = "654321987654321987654321";
+        ObjectId questionObjectId = new ObjectId(questionId);
+        UserQuestionUpdateDto updateDto = createUserQuestionUpdateDto("Updated text", skillId,
+                QuestionDifficulty.EASY, QuestionType.SOFT_SKILLS);
+        when(userQuestionRepository.findByIdAndUserId(questionObjectId, userId)).thenReturn(Optional.empty());
 
-        when(userClient.getById(userId)).thenReturn(Optional.of(new UserDto()));
-        when(userQuestionRepository.findByIdAndUserId(new ObjectId(questionId), userId))
-                .thenReturn(Optional.empty());
-
+        // when
+        // then
         assertThrows(NoSuchEntityException.class, () -> underTest.updateUserQuestion(userId, questionId, updateDto));
-        verify(userQuestionRepository).findByIdAndUserId(new ObjectId(questionId), userId);
     }
 
     @Test
-    void updateUserQuestion_shouldUpdateAndReturnUserQuestionDto_whenQuestionExists() {
+    @DisplayName("Should throw NoSuchEntityException when skill in update dto not found")
+    void shouldThrowNoSuchEntityExceptionWhenUpdatedSkillNotFound() {
+        // given
+        Long userId = 1L;
+        String questionId = "123456789123456789123456";
+        String skillId = "654321987654321987654321";
+        ObjectId questionObjectId = new ObjectId(questionId);
+        ObjectId skillObjectId = new ObjectId(skillId);
+        UserQuestionUpdateDto updateDto = createUserQuestionUpdateDto("Updated text", skillId,
+                QuestionDifficulty.EASY, QuestionType.SOFT_SKILLS);
+        when(userQuestionRepository.findByIdAndUserId(questionObjectId, userId)).thenReturn(Optional.of(userQuestionDocument));
+        when(skillRepository.findById(skillObjectId)).thenReturn(Optional.empty());
+
+        // when
+        // then
+        assertThrows(NoSuchEntityException.class, () -> underTest.updateUserQuestion(userId, questionId, updateDto));
+    }
+
+    @Test
+    @DisplayName("Should update user question when user and skill exists")
+    void shouldUpdateAndReturnUserQuestionDtoWhenQuestionExists() {
+        // given
         Long userId = 1L;
         String questionId = "123456789123456789123456";
         String skillId = "654321987654321987654321";
@@ -155,17 +236,17 @@ class UserQuestionServiceTest {
         UserQuestionDocument updatedDocument = createUserQuestionDocument(
                 questionObjectId, userId, "Updated text", QuestionDifficulty.EASY,
                 QuestionType.SOFT_SKILLS, updatedSkillDocument);
-        when(userClient.getById(userId)).thenReturn(Optional.of(new UserDto()));
         when(userQuestionRepository.findByIdAndUserId(questionObjectId, userId)).thenReturn(Optional.of(userQuestionDocument));
         when(skillRepository.findById(skillObjectId)).thenReturn(Optional.of(updatedSkillDocument));
         when(userQuestionMapper.updateDocument(userQuestionDocument, updateDto)).thenReturn(updatedDocument);
         when(userQuestionRepository.save(updatedDocument)).thenReturn(updatedDocument);
         when(userQuestionMapper.toDto(updatedDocument)).thenReturn(userQuestionDto);
 
+        // when
         UserQuestionDto result = underTest.updateUserQuestion(userId, questionId, updateDto);
 
+        // then
         assertNotNull(result);
-        matchQuestionFields(userQuestionDto, result);
         verify(userQuestionRepository).findByIdAndUserId(questionObjectId, userId);
         verify(skillRepository).findById(skillObjectId);
         verify(userQuestionMapper).updateDocument(userQuestionDocument, updateDto);
@@ -173,66 +254,85 @@ class UserQuestionServiceTest {
         verify(userQuestionMapper).toDto(updatedDocument);
     }
 
-
     @Test
-    void deleteUserQuestion_shouldDeleteQuestion_whenQuestionExists() {
+    @DisplayName("Should update user question with same data as in update dto")
+    void shouldUpdateQuestionWithSameDataAsInUpdateDto() {
+        // given
         Long userId = 1L;
         String questionId = "123456789123456789123456";
-        when(userClient.getById(userId)).thenReturn(Optional.of(new UserDto()));
-        doNothing().when(userQuestionRepository).deleteByUserIdAndSkill_Id(userId, new ObjectId(questionId));
+        String skillId = "654321987654321987654321";
+        ObjectId questionObjectId = new ObjectId(questionId);
+        ObjectId skillObjectId = new ObjectId(skillId);
+        SkillDocument updatedSkillDocument = SkillDocument.builder().id(skillObjectId).name("Haskell").build();
+        UserQuestionUpdateDto updateDto = createUserQuestionUpdateDto(
+                "Updated text", skillId, QuestionDifficulty.EASY, QuestionType.SOFT_SKILLS);
+        UserQuestionDocument updatedDocument = createUserQuestionDocument(
+                questionObjectId, userId, "Updated text", QuestionDifficulty.EASY,
+                QuestionType.SOFT_SKILLS, updatedSkillDocument);
+        when(userQuestionRepository.findByIdAndUserId(questionObjectId, userId)).thenReturn(Optional.of(userQuestionDocument));
+        when(skillRepository.findById(skillObjectId)).thenReturn(Optional.of(updatedSkillDocument));
+        when(userQuestionMapper.updateDocument(userQuestionDocument, updateDto)).thenReturn(updatedDocument);
+        when(userQuestionRepository.save(updatedDocument)).thenReturn(updatedDocument);
+        when(userQuestionMapper.toDto(updatedDocument)).thenReturn(userQuestionDto);
 
-        underTest.deleteUserQuestion(userId, questionId);
+        // when
+        UserQuestionDto result = underTest.updateUserQuestion(userId, questionId, updateDto);
 
-        verify(userQuestionRepository).deleteByUserIdAndSkill_Id(userId, new ObjectId(questionId));
+        // then
+        assertNotNull(result);
+        matchQuestionFields(userQuestionDto, result);
     }
 
     @Test
-    void getUserQuestionsBySkillId_shouldReturnUserQuestionDto() {
+    @DisplayName("Should delete user question for specified user")
+    void shouldDeleteUserQuestion() {
+        // given
+        Long userId = 1L;
+        String questionId = "123456789123456789123456";
+        doNothing().when(userQuestionRepository).deleteByUserIdAndSkillId(userId, new ObjectId(questionId));
+
+        // when
+        underTest.deleteUserQuestion(userId, questionId);
+
+        // then
+        verify(userQuestionRepository).deleteByUserIdAndSkillId(userId, new ObjectId(questionId));
+    }
+
+    @Test
+    @DisplayName("Should return not empty list of user questions by skill when questions exists for specified user")
+    void shouldReturnNotEmptyListOfUserQuestionBySkillForUser() {
+        // given
         Long userId = 1L;
         String skillId = "123456789123456789123456";
         List<UserQuestionDocument> questions = List.of(userQuestionDocument);
         when(userQuestionRepository.findAllByUserIdAndSkillId(userId, new ObjectId(skillId))).thenReturn(questions);
         when(userQuestionMapper.toDto(questions)).thenReturn(List.of(userQuestionDto));
 
+        // when
         List<UserQuestionDto> result = underTest.getUserQuestionsBySkillId(userId, skillId);
 
+        // then
         assertNotNull(result);
         assertEquals(1, result.size());
-        matchQuestionFields(userQuestionDto, result.getFirst());
         verify(userQuestionRepository).findAllByUserIdAndSkillId(userId, new ObjectId(skillId));
     }
 
     @Test
-    void createUserQuestion_shouldThrowNoSuchEntityException_whenUserNotFound() {
+    @DisplayName("Should return list of user questions for specified skill, that is stored in DB for user")
+    void shouldReturnListOfUserQuestionBySkillThatIsStoredInDB() {
+        // given
         Long userId = 1L;
-        UserQuestionCreateDto questionDto = new UserQuestionCreateDto();
-        when(userClient.getById(userId)).thenReturn(Optional.empty());
+        String skillId = "123456789123456789123456";
+        List<UserQuestionDocument> questions = List.of(userQuestionDocument);
+        when(userQuestionRepository.findAllByUserIdAndSkillId(userId, new ObjectId(skillId))).thenReturn(questions);
+        when(userQuestionMapper.toDto(questions)).thenReturn(List.of(userQuestionDto));
 
-        assertThrows(NoSuchEntityException.class, () -> underTest.createUserQuestion(userId, questionDto));
+        // when
+        List<UserQuestionDto> result = underTest.getUserQuestionsBySkillId(userId, skillId);
 
-        verify(userClient).getById(userId);
-    }
-
-    @Test
-    void updateUserQuestion_shouldThrowNoSuchEntityException_whenUserNotFound() {
-        Long userId = 1L;
-        UserQuestionUpdateDto questionDto = new UserQuestionUpdateDto();
-        when(userClient.getById(userId)).thenReturn(Optional.empty());
-
-        assertThrows(NoSuchEntityException.class, () -> underTest.updateUserQuestion(userId, "1",questionDto));
-
-        verify(userClient).getById(userId);
-    }
-
-    @Test
-    void deleteUserQuestion_shouldThrowNoSuchEntityException_whenUserNotFound() {
-        Long userId = 1L;
-        String questionId = "123";
-        when(userClient.getById(userId)).thenReturn(Optional.empty());
-
-        assertThrows(NoSuchEntityException.class, () -> underTest.deleteUserQuestion(userId, questionId));
-
-        verify(userClient).getById(userId);
+        // then
+        assertNotNull(result);
+        matchQuestionFields(userQuestionDto, result.getFirst());
     }
 
     private void matchQuestionFields(UserQuestionDto expected, UserQuestionDto actual) {

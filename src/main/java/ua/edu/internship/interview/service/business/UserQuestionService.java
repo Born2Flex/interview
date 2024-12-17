@@ -9,7 +9,6 @@ import ua.edu.internship.interview.data.documents.UserQuestionDocument;
 import ua.edu.internship.interview.data.repository.SkillRepository;
 import ua.edu.internship.interview.data.repository.UserQuestionRepository;
 import ua.edu.internship.interview.service.client.UserServiceClient;
-import ua.edu.internship.interview.service.dto.user.UserDto;
 import ua.edu.internship.interview.service.dto.user.question.UserQuestionCreateDto;
 import ua.edu.internship.interview.service.dto.user.question.UserQuestionDto;
 import ua.edu.internship.interview.service.dto.user.question.UserQuestionUpdateDto;
@@ -56,7 +55,7 @@ public class UserQuestionService {
 
     public void deleteUserQuestion(Long userId, String questionId) {
         log.info("Attempting to delete question with id: {}, for user with id: {}", questionId, userId);
-        userQuestionRepository.deleteByUserIdAndSkill_Id(userId, new ObjectId(questionId));
+        userQuestionRepository.deleteByUserIdAndSkillId(userId, new ObjectId(questionId));
         log.info("Question with id: {} deleted successfully, for user with id: {}", questionId, userId);
     }
 
@@ -80,6 +79,8 @@ public class UserQuestionService {
     }
 
     private void validateUserExistsById(Long userId) {
-        userClient.getById(userId).orElseThrow(() -> new NoSuchEntityException("User not found by id: " + userId));
+        if (!userClient.existsById(userId)) {
+            throw new NoSuchEntityException("User not found by id: " + userId);
+        }
     }
 }

@@ -1,6 +1,7 @@
 package ua.edu.internship.interview.service.mapper;
 
 import org.bson.types.ObjectId;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -28,21 +29,27 @@ class UserQuestionMapperTest {
     private UserQuestionMapper underTest = new UserQuestionMapperImpl();
 
     @Test
-    void toDto_shouldMapUserQuestionDocumentToUserQuestionDto() {
+    @DisplayName("Should map user question document to user question dto")
+    void shouldMapUserQuestionDocumentToUserQuestionDto() {
+        // given
         UserQuestionDocument questionDocument = createUserQuestionDocument();
         ObjectId skillId = questionDocument.getSkill().getId();
         ObjectId questionId = questionDocument.getId();
         when(baseMapper.map(skillId)).thenReturn(skillId.toString());
         when(baseMapper.map(questionId)).thenReturn(questionId.toString());
 
+        // when
         UserQuestionDto result = underTest.toDto(questionDocument);
 
+        // then
         assertNotNull(result);
         matchUserQuestionDocumentToDto(questionDocument, result);
     }
 
     @Test
-    void toDto_shouldMapListOfUserQuestionDocumentsToListOfUserQuestionDtos() {
+    @DisplayName("Should map list of user question documents to list of user question dtos")
+    void shouldMapListOfUserQuestionDocumentsToListOfUserQuestionDtos() {
+        // given
         UserQuestionDocument questionDocument = createUserQuestionDocument();
         ObjectId skillId = questionDocument.getSkill().getId();
         ObjectId questionId = questionDocument.getId();
@@ -50,31 +57,41 @@ class UserQuestionMapperTest {
         when(baseMapper.map(questionId)).thenReturn(questionId.toString());
         List<UserQuestionDocument> documents = List.of(questionDocument);
 
+        // when
         List<UserQuestionDto> result = underTest.toDto(documents);
 
+        // then
         assertNotNull(result);
         assertEquals(1, result.size());
         matchUserQuestionDocumentToDto(questionDocument, result.getFirst());
     }
 
     @Test
-    void toDocument_shouldMapUserQuestionCreateDtoToUserQuestionDocument() {
+    @DisplayName("Should map user question create dto to user question document")
+    void shouldMapUserQuestionCreateDtoToUserQuestionDocument() {
+        // given
         long userId = 1L;
         UserQuestionCreateDto userQuestionCreateDto = createUserQuestionCreateDto();
 
+        // when
         UserQuestionDocument result = underTest.toDocument(userId, userQuestionCreateDto);
 
+        // then
         assertNotNull(result);
         matchUserQuestionCreateDtoToDocument(userId, userQuestionCreateDto, result);
     }
 
     @Test
+    @DisplayName("Should update user question document with user question update dto")
     void updateDocument_shouldUpdateUserQuestionDocumentWithUserQuestionUpdateDto() {
+        // given
         UserQuestionUpdateDto userQuestionUpdateDto = createUserQuestionUpdateDto();
         UserQuestionDocument userQuestionDocument = createUserQuestionDocument();
 
+        // when
         underTest.updateDocument(userQuestionDocument, userQuestionUpdateDto);
 
+        // then
         assertNotNull(userQuestionDocument);
         matchUserQuestionUpdateDtoToDocument(userQuestionUpdateDto, userQuestionDocument);
     }

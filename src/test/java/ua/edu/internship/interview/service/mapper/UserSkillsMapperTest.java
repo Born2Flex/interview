@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 import org.bson.types.ObjectId;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,7 +26,9 @@ class UserSkillsMapperTest {
     private UserSkillsMapper underTest = new UserSkillsMapperImpl();
 
     @Test
-    void toDto_shouldMapUserSkillsDocumentToUserSkillsDto() {
+    @DisplayName("Should map user skills document to user skills dtos")
+    void shouldMapUserSkillsDocumentToUserSkillsDto() {
+        // given
         UserSkillsDocument userSkillsDocument = createUserSkillsDocument();
         when(baseMapper.map(userSkillsDocument.getId())).thenReturn(userSkillsDocument.getId().toString());
         List<SkillDto> skillDtos = List.of(
@@ -34,8 +37,10 @@ class UserSkillsMapperTest {
         );
         when(skillMapper.toDto(userSkillsDocument.getSkills())).thenReturn(skillDtos);
 
+        // when
         UserSkillsDto result = underTest.toDto(userSkillsDocument);
 
+        // then
         assertNotNull(result);
         matchUserSkillsDocumentToDto(userSkillsDocument, result);
     }

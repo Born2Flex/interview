@@ -3,6 +3,7 @@ package ua.edu.internship.interview.service.business;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -51,9 +52,13 @@ class SkillServiceIntegrationTest extends BaseIntegrationTest {
     }
 
     @Test
-    void testGetAllSkillTrees() {
+    @DisplayName("Should return all existing skill trees from DB")
+    void shouldReturnAllSkillTrees() {
+        // given
+        // when
         List<SkillTreeDto> skillTrees = skillService.getAllSkillTrees();
 
+        // then
         assertNotNull(skillTrees);
         assertEquals(3, skillTrees.size());
         assertEquals("Programming", skillTrees.getFirst().getName());
@@ -62,17 +67,26 @@ class SkillServiceIntegrationTest extends BaseIntegrationTest {
     }
 
     @Test
-    void testGetSkillTreeByIdNotFound() {
+    @DisplayName("Should throw NoSuchEntity exception, when document with specified root id not found")
+    void shouldThrowExceptionWhenNoDocumentWithSpecifiedRootId() {
+        // given
         String invalidId = new ObjectId().toHexString();
 
+        // when
+        // then
         assertThrows(NoSuchEntityException.class, () -> skillService.getSkillTreeById(invalidId));
     }
 
     @Test
-    void testGetSkillTreeByIdFound() {
+    @DisplayName("Should return skill tree by specified root id")
+    void shouldReturnSkillTreeByRootId() {
+        // given
         String objectId = "67483c5c8e8573107761acf3";
+
+        // when
         SkillTreeDto retrievedSkillTree = skillService.getSkillTreeById(objectId);
 
+        // then
         assertNotNull(retrievedSkillTree);
         assertEquals(objectId, retrievedSkillTree.getId());
         assertEquals("Database Architecture", retrievedSkillTree.getName());
