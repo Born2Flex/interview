@@ -14,7 +14,7 @@ class BaseMapperTest {
     public void setUp() {
         underTest = new BaseMapper();
     }
-
+//TODO Unify tests names
     @Test
     @DisplayName("Should map ObjectId to String with toString method")
     void shouldMapObjectIdToString() {
