@@ -6,8 +6,8 @@ import lombok.NoArgsConstructor;
 import ua.edu.internship.interview.data.enumeration.Role;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public abstract class UserBaseDto {
     private String email;
     private String firstName;

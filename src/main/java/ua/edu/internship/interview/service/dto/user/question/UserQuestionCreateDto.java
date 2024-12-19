@@ -8,8 +8,8 @@ import ua.edu.internship.interview.data.enumeration.QuestionDifficulty;
 import ua.edu.internship.interview.data.enumeration.QuestionType;
 
 @Data
-@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 public class UserQuestionCreateDto extends UserQuestionBaseDto {
     @Builder
     public UserQuestionCreateDto(String text, String skillId, QuestionDifficulty difficulty, QuestionType type) {
