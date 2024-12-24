@@ -10,7 +10,6 @@ import ua.edu.internship.interview.data.documents.UserQuestionDocument;
 import ua.edu.internship.interview.data.enumeration.InterviewStatus;
 import ua.edu.internship.interview.data.repository.InterviewRepository;
 import ua.edu.internship.interview.data.repository.UserQuestionRepository;
-import ua.edu.internship.interview.service.client.UserServiceClient;
 import ua.edu.internship.interview.service.dto.interview.InterviewCreateDto;
 import ua.edu.internship.interview.service.dto.interview.InterviewDto;
 import ua.edu.internship.interview.service.dto.interview.InterviewUpdateDto;
@@ -19,22 +18,20 @@ import ua.edu.internship.interview.service.dto.interview.question.InterviewQuest
 import ua.edu.internship.interview.service.dto.interview.question.InterviewQuestionUpdateDto;
 import ua.edu.internship.interview.service.mapper.InterviewMapper;
 import ua.edu.internship.interview.service.mapper.InterviewQuestionMapper;
-import ua.edu.internship.interview.service.utils.exceptions.InterviewCollisionException;
 import ua.edu.internship.interview.service.utils.exceptions.NoSuchEntityException;
+import ua.edu.internship.interview.service.validator.InterviewValidator;
 import java.time.LocalDateTime;
 import java.util.List;
-import static ua.edu.internship.interview.data.enumeration.InterviewStatus.validateStatusTransition;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class InterviewService {
-    public static final int TIME_WINDOW_OFFSET_IN_HOURS = 1;
     private final InterviewRepository interviewRepository;
     private final UserQuestionRepository userQuestionRepository;
     private final InterviewMapper interviewMapper;
     private final InterviewQuestionMapper questionMapper;
-    private final UserServiceClient userClient;
+    private final InterviewValidator validator;
 
     public List<InterviewDto> getAllInterviews() {
         List<InterviewDocument> interviews = interviewRepository.findAll();
@@ -51,9 +48,7 @@ public class InterviewService {
     public InterviewDto createInterview(InterviewCreateDto dto) {
         log.info("Attempting to create new interview");
         InterviewDocument interviewDocument = interviewMapper.toDocument(dto);
-        validateUserExistsById(interviewDocument.getInterviewerId());
-        validateUserExistsById(interviewDocument.getCandidateId());
-        validateInterviewNotCausingConflicts(interviewDocument);
+        validator.validateInterviewCreation(interviewDocument);
         interviewDocument.setStatus(InterviewStatus.PLANNED);
         InterviewDocument savedInterview = interviewRepository.save(interviewDocument);
         log.info("Created new interview with id: {}", savedInterview.getId());
@@ -64,7 +59,7 @@ public class InterviewService {
         log.info("Attempting to update interview with id: {}", id);
         InterviewDocument interviewDocument = getInterviewByIdOrElseThrow(id);
         interviewDocument = interviewMapper.updateDocument(interviewDocument, dto);
-        validateInterviewNotCausingConflicts(interviewDocument);
+        validator.validateInterviewUpdate(interviewDocument);
         InterviewDocument updatedInterview = interviewRepository.save(interviewDocument);
         log.info("Updated interview with id: {}", updatedInterview.getId());
         return interviewMapper.toDto(updatedInterview);
@@ -86,7 +81,7 @@ public class InterviewService {
     }
 
     private InterviewDocument updateInterviewStatusAndTime(InterviewDocument interviewDocument, InterviewStatus newStatus) {
-        validateStatusTransition(interviewDocument.getStatus(), newStatus);
+        validator.validateInterviewStatusTransition(interviewDocument.getStatus(), newStatus);
         interviewDocument.setStatus(newStatus);
         if (newStatus == InterviewStatus.ACTIVE) {
             interviewDocument.setStartTime(LocalDateTime.now());
@@ -121,6 +116,11 @@ public class InterviewService {
                 .build();
     }
 
+    private UserQuestionDocument getUserQuestionByIdOrElseThrow(String id) {
+        return userQuestionRepository.findById(new ObjectId(id))
+                .orElseThrow(() -> new NoSuchEntityException("User Question not found by id: " + id));
+    }
+
     public InterviewQuestionDto updateInterviewQuestion(String interviewId, String questionId,
                                                         InterviewQuestionUpdateDto dto) {
         log.info("Attempting to update interview question for interview with id: {}", interviewId);
@@ -132,40 +132,6 @@ public class InterviewService {
         return questionMapper.toDto(questionDocument);
     }
 
-    public void deleteInterviewQuestionById(String interviewId, String questionId) {
-        log.info("Attempting to delete interview question for interview with id: {}", interviewId);
-        InterviewDocument interviewDocument = getInterviewByIdOrElseThrow(interviewId);
-        ObjectId questionObjectId = new ObjectId(questionId);
-        interviewDocument.getQuestions().removeIf(q -> q.getId().equals(questionObjectId));
-        interviewRepository.save(interviewDocument);
-        log.info("Deleted interview question for interview with id: {}", interviewId);
-    }
-
-    private void validateInterviewNotCausingConflicts(InterviewDocument interview) {
-        LocalDateTime plannedTime = interview.getPlannedTime();
-        LocalDateTime from = plannedTime.minusHours(TIME_WINDOW_OFFSET_IN_HOURS);
-        LocalDateTime to = plannedTime.plusHours(TIME_WINDOW_OFFSET_IN_HOURS);
-        boolean existsInterviews = interviewRepository
-                .existsInterviewsInTimeWindow(interview.getInterviewerId(), interview.getCandidateId(), from, to);
-        if (existsInterviews) {
-            String exceptionMessage =
-                    String.format("Cannot create interview for interviewer with id '%s' and candidate with id '%s' " +
-                                    "at %s. Interview conflicts with existing interviews.",
-                    interview.getInterviewerId(), interview.getCandidateId(), plannedTime);
-            throw new InterviewCollisionException(exceptionMessage);
-        }
-    }
-
-    private InterviewDocument getInterviewByIdOrElseThrow(String id) {
-        return interviewRepository.findById(new ObjectId(id))
-                .orElseThrow(() -> new NoSuchEntityException("Interview not found by id: " + id));
-    }
-
-    private UserQuestionDocument getUserQuestionByIdOrElseThrow(String id) {
-        return userQuestionRepository.findById(new ObjectId(id))
-                .orElseThrow(() -> new NoSuchEntityException("User Question not found by id: " + id));
-    }
-
     private InterviewQuestionDocument getInterviewQuestionByIdOrElseThrow(String questionId,
                                                                           InterviewDocument interviewDocument) {
         ObjectId questionObjectId = new ObjectId(questionId);
@@ -175,9 +141,17 @@ public class InterviewService {
                 .orElseThrow(() -> new NoSuchEntityException("Interview Question not found by id: " + questionId));
     }
 
-    private void validateUserExistsById(Long userId) {
-        if (!userClient.existsById(userId)) {
-            throw new NoSuchEntityException("User not found by id: " + userId);
-        }
+    public void deleteInterviewQuestionById(String interviewId, String questionId) {
+        log.info("Attempting to delete interview question for interview with id: {}", interviewId);
+        InterviewDocument interviewDocument = getInterviewByIdOrElseThrow(interviewId);
+        ObjectId questionObjectId = new ObjectId(questionId);
+        interviewDocument.getQuestions().removeIf(q -> q.getId().equals(questionObjectId));
+        interviewRepository.save(interviewDocument);
+        log.info("Deleted interview question for interview with id: {}", interviewId);
+    }
+
+    private InterviewDocument getInterviewByIdOrElseThrow(String id) {
+        return interviewRepository.findById(new ObjectId(id))
+                .orElseThrow(() -> new NoSuchEntityException("Interview not found by id: " + id));
     }
 }

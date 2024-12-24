@@ -10,7 +10,6 @@ import ua.edu.internship.interview.data.enumeration.QuestionType;
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-@NoArgsConstructor
 public class UserQuestionCreateDto extends UserQuestionBaseDto {
     @Builder
     public UserQuestionCreateDto(String text, String skillId, QuestionDifficulty difficulty, QuestionType type) {

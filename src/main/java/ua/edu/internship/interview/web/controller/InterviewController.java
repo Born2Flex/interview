@@ -58,7 +58,6 @@ public class InterviewController {
         service.deleteInterviewById(interviewId);
     }
 
-//TODO Add comment in pull request, so it would be reasonable to add this endpoint
     @PatchMapping("/{interviewId}/status")
     public InterviewDto updateInterviewStatus(@PathVariable String interviewId, @RequestBody InterviewStatus status) {
         return service.updateInterviewStatus(interviewId, status);

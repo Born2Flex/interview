@@ -18,7 +18,6 @@ import ua.edu.internship.interview.data.enumeration.QuestionDifficulty;
 import ua.edu.internship.interview.data.enumeration.QuestionType;
 import ua.edu.internship.interview.data.repository.InterviewRepository;
 import ua.edu.internship.interview.data.repository.UserQuestionRepository;
-import ua.edu.internship.interview.service.client.UserServiceClient;
 import ua.edu.internship.interview.service.dto.interview.InterviewCreateDto;
 import ua.edu.internship.interview.service.dto.interview.InterviewDto;
 import ua.edu.internship.interview.service.dto.interview.InterviewUpdateDto;
@@ -27,9 +26,8 @@ import ua.edu.internship.interview.service.dto.interview.question.InterviewQuest
 import ua.edu.internship.interview.service.dto.interview.question.InterviewQuestionUpdateDto;
 import ua.edu.internship.interview.service.mapper.InterviewMapper;
 import ua.edu.internship.interview.service.mapper.InterviewQuestionMapper;
-import ua.edu.internship.interview.service.utils.exceptions.InterviewCollisionException;
-import ua.edu.internship.interview.service.utils.exceptions.InvalidStatusTransitionException;
 import ua.edu.internship.interview.service.utils.exceptions.NoSuchEntityException;
+import ua.edu.internship.interview.service.validator.InterviewValidator;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +38,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static ua.edu.internship.interview.service.business.InterviewService.TIME_WINDOW_OFFSET_IN_HOURS;
 import static ua.edu.internship.interview.utils.TestUtils.createInterviewDocument;
 import static ua.edu.internship.interview.utils.TestUtils.createInterviewDto;
 import static ua.edu.internship.interview.utils.TestUtils.createInterviewQuestionDocument;
@@ -61,7 +58,7 @@ class InterviewServiceTest {
     @Mock
     private InterviewQuestionMapper questionMapper;
     @Mock
-    private UserServiceClient userClient;
+    private InterviewValidator validator;
     @InjectMocks
     private InterviewService underTest;
 
@@ -163,83 +160,15 @@ class InterviewServiceTest {
     }
 
     @Test
-    @DisplayName("Should throw NoSuchEntityException when interviewer does not exists")
-    void shouldThrowNoSuchEntityExceptionWhenInterviewerDoesNotExist() {
-        // given
-        Long interviewerId = 1L;
-        Long candidateId = 2L;
-        LocalDateTime plannedTime = LocalDateTime.now();
-        InterviewCreateDto interviewCreationDto =
-                new InterviewCreateDto(interviewerId, candidateId, "Title", plannedTime);
-        when(interviewMapper.toDocument(interviewCreationDto)).thenReturn(interviewDocument);
-        when(userClient.existsById(interviewerId)).thenReturn(false);
-
-        // when
-        // then
-        assertThrows(NoSuchEntityException.class, () -> underTest.createInterview(interviewCreationDto));
-        verify(interviewMapper).toDocument(interviewCreationDto);
-        verify(userClient).existsById(interviewerId);
-    }
-
-    @Test
-    @DisplayName("Should throw NoSuchEntityException when candidate does not exists")
-    void shouldThrowNoSuchEntityExceptionWhenCandidateDoesNotExist() {
-        // given
-        Long interviewerId = 1L;
-        Long candidateId = 2L;
-        LocalDateTime plannedTime = LocalDateTime.now();
-        InterviewCreateDto interviewCreationDto =
-                new InterviewCreateDto(interviewerId, candidateId, "Title", plannedTime);
-        when(interviewMapper.toDocument(interviewCreationDto)).thenReturn(interviewDocument);
-        when(userClient.existsById(interviewerId)).thenReturn(true);
-        when(userClient.existsById(candidateId)).thenReturn(false);
-
-        // when
-        // then
-        assertThrows(NoSuchEntityException.class, () -> underTest.createInterview(interviewCreationDto));
-        verify(interviewMapper).toDocument(interviewCreationDto);
-        verify(userClient).existsById(interviewerId);
-        verify(userClient).existsById(candidateId);
-    }
-
-    @Test
-    @DisplayName("Should throw InterviewCollisionException when interview collision occurs")
-    void shouldThrowInterviewCollisionExceptionWhenInterviewCollisionOccurs() {
-        // given
-        Long interviewerId = 1L;
-        Long candidateId = 2L;
-        LocalDateTime from = interviewDocument.getPlannedTime().minusHours(TIME_WINDOW_OFFSET_IN_HOURS);
-        LocalDateTime to = interviewDocument.getPlannedTime().plusHours(TIME_WINDOW_OFFSET_IN_HOURS);
-        InterviewCreateDto interviewCreationDto =
-                new InterviewCreateDto(interviewerId, candidateId, "Title", LocalDateTime.now());
-        when(interviewMapper.toDocument(interviewCreationDto)).thenReturn(interviewDocument);
-        when(userClient.existsById(interviewerId)).thenReturn(true);
-        when(userClient.existsById(candidateId)).thenReturn(true);
-        when(interviewRepository.existsInterviewsInTimeWindow(interviewerId, candidateId, from, to)).thenReturn(true);
-
-        // when
-        // then
-        assertThrows(InterviewCollisionException.class, () -> underTest.createInterview(interviewCreationDto));
-        verify(interviewMapper).toDocument(interviewCreationDto);
-        verify(userClient).existsById(interviewerId);
-        verify(userClient).existsById(candidateId);
-        verify(interviewRepository).existsInterviewsInTimeWindow(interviewerId, candidateId, from, to);
-    }
-
-    @Test
-    @DisplayName("Should create new interview")
+    @DisplayName("Should create new interview when interview is valid")
     void shouldCreateNewInterview() {
         // given
         Long interviewerId = 1L;
         Long candidateId = 2L;
-        LocalDateTime from = interviewDocument.getPlannedTime().minusHours(TIME_WINDOW_OFFSET_IN_HOURS);
-        LocalDateTime to = interviewDocument.getPlannedTime().plusHours(TIME_WINDOW_OFFSET_IN_HOURS);
         InterviewCreateDto interviewCreationDto =
                 new InterviewCreateDto(interviewerId, candidateId, "Title", LocalDateTime.now());
         when(interviewMapper.toDocument(interviewCreationDto)).thenReturn(interviewDocument);
-        when(userClient.existsById(interviewerId)).thenReturn(true);
-        when(userClient.existsById(candidateId)).thenReturn(true);
-        when(interviewRepository.existsInterviewsInTimeWindow(interviewerId, candidateId, from, to)).thenReturn(false);
+        doNothing().when(validator).validateInterviewCreation(interviewDocument);
         when(interviewRepository.save(newInterviewDocument)).thenReturn(newInterviewDocument);
         when(interviewMapper.toDto(newInterviewDocument)).thenReturn(createInterviewDto(newInterviewDocument));
 
@@ -250,9 +179,7 @@ class InterviewServiceTest {
         assertNotNull(result);
         matchInterviewFields(createInterviewDto(newInterviewDocument), result);
         verify(interviewMapper).toDocument(interviewCreationDto);
-        verify(userClient).existsById(interviewerId);
-        verify(userClient).existsById(candidateId);
-        verify(interviewRepository).existsInterviewsInTimeWindow(interviewerId, candidateId, from, to);
+        verify(validator).validateInterviewCreation(interviewDocument);
         verify(interviewRepository).save(newInterviewDocument);
         verify(interviewMapper).toDto(newInterviewDocument);
     }
@@ -272,44 +199,16 @@ class InterviewServiceTest {
     }
 
     @Test
-    @DisplayName("Should throw InterviewCollisionException when updating interview and collision occurs")
-    void shouldThrowInterviewCollisionExceptionWhenUpdatingInterviewAndCollisionOccurs() {
-        // given
-        Long interviewerId = 1L;
-        Long candidateId = 2L;
-        String interviewId = "748456789123456789123456";
-        InterviewUpdateDto interviewUpdateDto = createInterviewUpdateDto("New title", LocalDateTime.now().plusDays(1));
-        LocalDateTime from = interviewUpdateDto.getPlannedTime().minusHours(TIME_WINDOW_OFFSET_IN_HOURS);
-        LocalDateTime to = interviewUpdateDto.getPlannedTime().plusHours(TIME_WINDOW_OFFSET_IN_HOURS);
-        when(interviewRepository.findById(new ObjectId(interviewId))).thenReturn(Optional.of(interviewDocument));
-        newInterviewDocument.setPlannedTime(interviewUpdateDto.getPlannedTime());
-        newInterviewDocument.setTitle(interviewUpdateDto.getTitle());
-        when(interviewMapper.updateDocument(interviewDocument, interviewUpdateDto)).thenReturn(newInterviewDocument);
-        when(interviewRepository.existsInterviewsInTimeWindow(interviewerId, candidateId, from, to)).thenReturn(true);
-
-        // when
-        // then
-        assertThrows(InterviewCollisionException.class, () -> underTest.updateInterview(interviewId, interviewUpdateDto));
-        verify(interviewRepository).findById(new ObjectId(interviewId));
-        verify(interviewMapper).updateDocument(interviewDocument, interviewUpdateDto);
-        verify(interviewRepository).existsInterviewsInTimeWindow(interviewerId, candidateId, from, to);
-    }
-
-    @Test
     @DisplayName("Should update planned interview")
     void shouldUpdatePlannedInterview() {
         // given
-        Long interviewerId = 1L;
-        Long candidateId = 2L;
         String interviewId = "748456789123456789123456";
         InterviewUpdateDto interviewUpdateDto = createInterviewUpdateDto("New title", LocalDateTime.now().plusDays(1));
-        LocalDateTime from = interviewUpdateDto.getPlannedTime().minusHours(TIME_WINDOW_OFFSET_IN_HOURS);
-        LocalDateTime to = interviewUpdateDto.getPlannedTime().plusHours(TIME_WINDOW_OFFSET_IN_HOURS);
         when(interviewRepository.findById(new ObjectId(interviewId))).thenReturn(Optional.of(interviewDocument));
         newInterviewDocument.setPlannedTime(interviewUpdateDto.getPlannedTime());
         newInterviewDocument.setTitle(interviewUpdateDto.getTitle());
         when(interviewMapper.updateDocument(interviewDocument, interviewUpdateDto)).thenReturn(newInterviewDocument);
-        when(interviewRepository.existsInterviewsInTimeWindow(interviewerId, candidateId, from, to)).thenReturn(false);
+        doNothing().when(validator).validateInterviewUpdate(newInterviewDocument);
         when(interviewRepository.save(newInterviewDocument)).thenReturn(newInterviewDocument);
         when(interviewMapper.toDto(newInterviewDocument)).thenReturn(createInterviewDto(newInterviewDocument));
 
@@ -321,7 +220,7 @@ class InterviewServiceTest {
         matchInterviewFields(createInterviewDto(newInterviewDocument), result);
         verify(interviewRepository).findById(new ObjectId(interviewId));
         verify(interviewMapper).updateDocument(interviewDocument, interviewUpdateDto);
-        verify(interviewRepository).existsInterviewsInTimeWindow(interviewerId, candidateId, from, to);
+        verify(validator).validateInterviewUpdate(newInterviewDocument);
         verify(interviewRepository).save(newInterviewDocument);
         verify(interviewMapper).toDto(newInterviewDocument);
     }
@@ -351,20 +250,6 @@ class InterviewServiceTest {
         // when
         // then
         assertThrows(NoSuchEntityException.class, () -> underTest.updateInterviewStatus(interviewId, status));
-        verify(interviewRepository).findById(new ObjectId(interviewId));
-    }
-
-    @Test
-    @DisplayName("Should throw InvalidStateTransitionException when trying to set invalid status of interview")
-    void shouldThrowInvalidStateTransitionExceptionWhenTryingToSetInvalidStatusOfInterview() {
-        // given
-        InterviewStatus status = InterviewStatus.PLANNED;
-        String interviewId = "748456789123456789123456";
-        when(interviewRepository.findById(new ObjectId(interviewId))).thenReturn(Optional.of(interviewDocument));
-
-        // when
-        // then
-        assertThrows(InvalidStatusTransitionException.class, () -> underTest.updateInterviewStatus(interviewId, status));
         verify(interviewRepository).findById(new ObjectId(interviewId));
     }
 

@@ -1,9 +1,10 @@
 package ua.edu.internship.interview.data.enumeration;
 
-import ua.edu.internship.interview.service.utils.exceptions.InvalidStatusTransitionException;
+import lombok.Getter;
 import java.util.EnumSet;
 import java.util.Set;
 
+@Getter
 public enum InterviewStatus {
     PLANNED,
     ACTIVE,
@@ -17,15 +18,5 @@ public enum InterviewStatus {
         ACTIVE.transitions = EnumSet.of(COMPLETED, CANCELLED);
         COMPLETED.transitions = EnumSet.noneOf(InterviewStatus.class);
         CANCELLED.transitions = EnumSet.noneOf(InterviewStatus.class);
-    }
-
-    public Set<InterviewStatus> getTransitions() {
-        return transitions;
-    }
-
-    public static void validateStatusTransition(InterviewStatus currentStatus, InterviewStatus newStatus) {
-        if (!currentStatus.transitions.contains(newStatus)) {
-            throw new InvalidStatusTransitionException("Invalid transition from " + currentStatus + " to " + newStatus);
-        }
     }
 }
